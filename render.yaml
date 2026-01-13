@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: access-pal-server
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && node src/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  - type: web
+    name: access-pal-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: client/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
