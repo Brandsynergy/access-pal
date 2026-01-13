@@ -54,6 +54,20 @@ export const CallProvider = ({ children }) => {
     // Initialize socket for homeowner to receive calls
     webrtcService.initSocket();
 
+    // Get user's QR code ID from localStorage and join room
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.qrCodeId) {
+          console.log('🏠 Homeowner joining room:', user.qrCodeId);
+          webrtcService.socket.emit('join-room', user.qrCodeId);
+        }
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+
     // Listen for incoming visitor alerts
     webrtcService.socket.on('visitor-at-door', (data) => {
       console.log('🔔 Visitor at door!', data);
