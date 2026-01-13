@@ -1,0 +1,145 @@
+.qr-display-container {
+  padding: 40px 20px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-display-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.qr-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.qr-header h2 {
+  font-size: 28px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.qr-header p {
+  color: var(--text-light);
+  font-size: 16px;
+}
+
+.qr-code-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.qr-code-image {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  border: 3px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  background: white;
+  position: relative;
+  z-index: 1;
+}
+
+.qr-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.qr-info {
+  background: var(--light);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.info-value {
+  color: var(--text);
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.qr-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 30px 0;
+}
+
+.qr-actions button {
+  width: 100%;
+}
+
+.qr-instructions {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 30px;
+}
+
+.qr-instructions h3 {
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.qr-instructions ol {
+  margin-left: 20px;
+  line-height: 1.8;
+}
+
+.qr-instructions li {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .qr-display-card {
+    padding: 24px;
+  }
+
+  .qr-header h2 {
+    font-size: 24px;
+  }
+
+  .qr-code-image {
+    max-width: 280px;
+  }
+
+  .qr-glow {
+    width: 300px;
+    height: 300px;
+  }
+}

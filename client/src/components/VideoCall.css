@@ -1,0 +1,241 @@
+.video-call-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000;
+  z-index: 9998;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.video-call-container-homeowner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Connecting State */
+.connecting-state {
+  text-align: center;
+  color: white;
+}
+
+.connecting-spinner {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #667eea;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 30px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.connecting-state h2 {
+  font-size: 2rem;
+  margin: 20px 0 10px 0;
+}
+
+.connecting-state p {
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+/* Remote Video (Visitor) */
+.remote-video-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.remote-video-homeowner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #1a1a1a;
+}
+
+.video-label-overlay {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+/* Local Video (Homeowner) */
+.local-video-container {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  width: 240px;
+  height: 180px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 4px solid white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+}
+
+.local-video-homeowner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #1a1a1a;
+}
+
+.video-label-small-overlay {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+/* Call Controls */
+.call-controls-homeowner {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 25px;
+  z-index: 20;
+}
+
+.control-button {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.control-button:hover {
+  transform: scale(1.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.control-button:active {
+  transform: scale(1.05);
+}
+
+.control-button.active {
+  background: #ef4444;
+  color: white;
+}
+
+.end-call-btn {
+  background: #dc2626 !important;
+  color: white;
+  width: 75px;
+  height: 75px;
+  font-size: 2.2rem;
+}
+
+.end-call-btn:hover {
+  background: #b91c1c !important;
+  transform: scale(1.2);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .local-video-container {
+    width: 140px;
+    height: 105px;
+    top: 20px;
+    right: 20px;
+    border: 3px solid white;
+  }
+
+  .video-label-overlay {
+    bottom: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+
+  .call-controls-homeowner {
+    bottom: 30px;
+    gap: 18px;
+  }
+
+  .control-button {
+    width: 55px;
+    height: 55px;
+    font-size: 1.7rem;
+  }
+
+  .end-call-btn {
+    width: 65px;
+    height: 65px;
+    font-size: 1.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .local-video-container {
+    width: 100px;
+    height: 75px;
+    top: 15px;
+    right: 15px;
+  }
+
+  .video-label-overlay {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+
+  .call-controls-homeowner {
+    bottom: 20px;
+    gap: 15px;
+  }
+
+  .control-button {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+
+  .end-call-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 1.7rem;
+  }
+}

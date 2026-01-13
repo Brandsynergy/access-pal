@@ -1,0 +1,315 @@
+import { io } from 'socket.io-client';
+
+const STUN_SERVER = 'stun:stun.l.google.com:19302';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
+class WebRTCService {
+  constructor() {
+    this.socket = null;
+    this.peerConnection = null;
+    this.localStream = null;
+    this.remoteStream = null;
+    this.qrCodeId = null;
+    this.userType = null; // 'visitor' or 'homeowner'
+    
+    // Callbacks
+    this.onRemoteStream = null;
+    this.onCallEnded = null;
+    this.onError = null;
+    this.onConnectionStateChange = null;
+  }
+
+  // Initialize socket connection
+  initSocket() {
+    if (this.socket) return this.socket;
+    
+    this.socket = io(API_URL, {
+      transports: ['websocket', 'polling']
+    });
+
+    this.socket.on('connect', () => {
+      console.log('✅ Socket connected:', this.socket.id);
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('❌ Socket disconnected');
+    });
+
+    this.socket.on('error', (error) => {
+      console.error('Socket error:', error);
+      if (this.onError) this.onError(error);
+    });
+
+    return this.socket;
+  }
+
+  // Initialize WebRTC peer connection
+  initPeerConnection() {
+    const configuration = {
+      iceServers: [{ urls: STUN_SERVER }]
+    };
+
+    this.peerConnection = new RTCPeerConnection(configuration);
+
+    // Handle ICE candidates
+    this.peerConnection.onicecandidate = (event) => {
+      if (event.candidate && this.socket) {
+        this.socket.emit('ice-candidate', {
+          room: this.qrCodeId,
+          candidate: event.candidate
+        });
+      }
+    };
+
+    // Handle remote stream
+    this.peerConnection.ontrack = (event) => {
+      console.log('📹 Received remote track');
+      if (!this.remoteStream) {
+        this.remoteStream = new MediaStream();
+      }
+      this.remoteStream.addTrack(event.track);
+      
+      if (this.onRemoteStream) {
+        this.onRemoteStream(this.remoteStream);
+      }
+    };
+
+    // Monitor connection state
+    this.peerConnection.onconnectionstatechange = () => {
+      console.log('Connection state:', this.peerConnection.connectionState);
+      
+      if (this.onConnectionStateChange) {
+        this.onConnectionStateChange(this.peerConnection.connectionState);
+      }
+
+      if (this.peerConnection.connectionState === 'failed') {
+        this.handleConnectionFailure();
+      }
+    };
+
+    return this.peerConnection;
+  }
+
+  // Get local media stream (camera + microphone)
+  async getLocalStream() {
+    try {
+      this.localStream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true
+        }
+      });
+
+      console.log('✅ Got local stream');
+      return this.localStream;
+    } catch (error) {
+      console.error('❌ Error accessing media devices:', error);
+      if (this.onError) {
+        this.onError('Unable to access camera/microphone. Please grant permissions.');
+      }
+      throw error;
+    }
+  }
+
+  // Visitor initiates call
+  async startCall(qrCodeId) {
+    try {
+      this.qrCodeId = qrCodeId;
+      this.userType = 'visitor';
+
+      // Initialize socket and peer connection
+      this.initSocket();
+      this.initPeerConnection();
+
+      // Get local media
+      await this.getLocalStream();
+
+      // Add local tracks to peer connection
+      this.localStream.getTracks().forEach(track => {
+        this.peerConnection.addTrack(track, this.localStream);
+      });
+
+      // Join room
+      this.socket.emit('join-room', qrCodeId);
+
+      // Alert homeowner that visitor is at door
+      this.socket.emit('visitor-alert', { 
+        qrCodeId,
+        timestamp: new Date().toISOString()
+      });
+
+      // Listen for answer from homeowner
+      this.socket.on('answer', async (data) => {
+        console.log('📞 Received answer from homeowner');
+        await this.peerConnection.setRemoteDescription(
+          new RTCSessionDescription(data.answer)
+        );
+      });
+
+      // Listen for ICE candidates
+      this.socket.on('ice-candidate', async (data) => {
+        if (data.candidate) {
+          await this.peerConnection.addIceCandidate(
+            new RTCIceCandidate(data.candidate)
+          );
+        }
+      });
+
+      // Create and send offer
+      const offer = await this.peerConnection.createOffer();
+      await this.peerConnection.setLocalDescription(offer);
+
+      this.socket.emit('offer', {
+        room: qrCodeId,
+        offer: offer
+      });
+
+      console.log('📤 Sent offer to homeowner');
+
+    } catch (error) {
+      console.error('❌ Error starting call:', error);
+      if (this.onError) this.onError(error.message);
+      throw error;
+    }
+  }
+
+  // Homeowner answers call
+  async answerCall(qrCodeId, offer) {
+    try {
+      this.qrCodeId = qrCodeId;
+      this.userType = 'homeowner';
+
+      // Initialize peer connection if not exists
+      if (!this.peerConnection) {
+        this.initPeerConnection();
+      }
+
+      // Get local media
+      await this.getLocalStream();
+
+      // Add local tracks to peer connection
+      this.localStream.getTracks().forEach(track => {
+        this.peerConnection.addTrack(track, this.localStream);
+      });
+
+      // Set remote description (visitor's offer)
+      await this.peerConnection.setRemoteDescription(
+        new RTCSessionDescription(offer)
+      );
+
+      // Create answer
+      const answer = await this.peerConnection.createAnswer();
+      await this.peerConnection.setLocalDescription(answer);
+
+      // Send answer back to visitor
+      this.socket.emit('answer', {
+        room: qrCodeId,
+        answer: answer
+      });
+
+      // Listen for ICE candidates
+      this.socket.on('ice-candidate', async (data) => {
+        if (data.candidate) {
+          await this.peerConnection.addIceCandidate(
+            new RTCIceCandidate(data.candidate)
+          );
+        }
+      });
+
+      console.log('📤 Sent answer to visitor');
+
+    } catch (error) {
+      console.error('❌ Error answering call:', error);
+      if (this.onError) this.onError(error.message);
+      throw error;
+    }
+  }
+
+  // Setup socket listeners for homeowner
+  setupHomeownerListeners() {
+    if (!this.socket) {
+      this.initSocket();
+    }
+
+    // Listen for offers from visitors
+    this.socket.on('offer', async (data) => {
+      console.log('📞 Received offer from visitor');
+      // Store offer for when homeowner accepts
+      this.pendingOffer = data.offer;
+      this.qrCodeId = data.room;
+    });
+  }
+
+  // Mute/unmute audio
+  toggleAudio(enabled) {
+    if (this.localStream) {
+      this.localStream.getAudioTracks().forEach(track => {
+        track.enabled = enabled;
+      });
+    }
+  }
+
+  // Mute/unmute video
+  toggleVideo(enabled) {
+    if (this.localStream) {
+      this.localStream.getVideoTracks().forEach(track => {
+        track.enabled = enabled;
+      });
+    }
+  }
+
+  // End call
+  endCall() {
+    console.log('📞 Ending call...');
+
+    // Stop all tracks
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(track => track.stop());
+    }
+
+    // Close peer connection
+    if (this.peerConnection) {
+      this.peerConnection.close();
+      this.peerConnection = null;
+    }
+
+    // Emit call ended event
+    if (this.socket) {
+      this.socket.emit('call-ended', { room: this.qrCodeId });
+    }
+
+    // Reset streams
+    this.localStream = null;
+    this.remoteStream = null;
+
+    if (this.onCallEnded) {
+      this.onCallEnded();
+    }
+  }
+
+  // Handle connection failure
+  handleConnectionFailure() {
+    console.error('❌ Connection failed');
+    if (this.onError) {
+      this.onError('Connection failed. Please try again.');
+    }
+    this.endCall();
+  }
+
+  // Cleanup
+  cleanup() {
+    this.endCall();
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+  }
+}
+
+// Export singleton instance
+export const webrtcService = new WebRTCService();
+export default webrtcService;

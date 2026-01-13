@@ -1,0 +1,22 @@
+{
+  "name": "access-pal",
+  "version": "1.0.0",
+  "description": "Smart Video Doorbell with QR Code Technology",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client && npm run build --prefix server",
+    "start": "npm start --prefix server"
+  },
+  "keywords": ["video-doorbell", "intercom", "qr-code", "webrtc"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
