@@ -1,7 +1,9 @@
 import { io } from 'socket.io-client';
 
 const STUN_SERVER = 'stun:stun.l.google.com:19302';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+// Remove /api from the URL for Socket.IO connection
+const SOCKET_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '');
+const API_URL = SOCKET_URL;
 
 class WebRTCService {
   constructor() {
@@ -136,11 +138,14 @@ class WebRTCService {
       // Join room
       this.socket.emit('join-room', qrCodeId);
 
-      // Alert homeowner that visitor is at door
-      this.socket.emit('visitor-alert', { 
-        qrCodeId,
-        timestamp: new Date().toISOString()
-      });
+      // Wait a moment to ensure room is fully joined, then alert homeowner
+      setTimeout(() => {
+        console.log('🔔 Sending visitor alert to homeowner...');
+        this.socket.emit('visitor-alert', { 
+          qrCodeId,
+          timestamp: new Date().toISOString()
+        });
+      }, 1000); // 1 second delay to ensure room connection is established
 
       // Listen for answer from homeowner
       this.socket.on('answer', async (data) => {
