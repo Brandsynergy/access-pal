@@ -27,7 +27,9 @@ export const AuthProvider = ({ children }) => {
   const loadUser = async () => {
     try {
       const response = await authAPI.getProfile();
-      setUser(response.data.data.user);
+      const userData = response.data.data.user;
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
     } catch (error) {
       console.error('Load user error:', error);
       logout();
@@ -41,6 +43,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register(userData);
       const { user, token } = response.data.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
       setToken(token);
       setUser(user);
       return { success: true };
@@ -57,6 +60,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login(credentials);
       const { user, token } = response.data.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
       setToken(token);
       setUser(user);
       return { success: true };
@@ -70,6 +74,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
   };
