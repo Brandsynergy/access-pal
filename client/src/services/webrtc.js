@@ -146,8 +146,12 @@ class WebRTCService {
       // Set up listeners FIRST before sending anything
       console.log('👂 VISITOR: Setting up answer and ICE candidate listeners');
       
-      // Listen for answer from homeowner
-      this.socket.on('answer', async (data) => {
+      // Remove any existing listeners to prevent duplicates
+      this.socket.off('answer');
+      this.socket.off('ice-candidate');
+      
+      // Listen for answer from homeowner (use once to ensure it only fires one time)
+      this.socket.once('answer', async (data) => {
         console.log('📞📞📞 VISITOR: Received answer from homeowner!');
         console.log('Answer data:', data);
         try {
