@@ -35,9 +35,15 @@ function VisitorCall() {
   useEffect(() => {
     // Update remote video element when stream changes
     if (remoteVideoRef.current && remoteStream) {
+      console.log('📺 Setting remote video srcObject');
       remoteVideoRef.current.srcObject = remoteStream;
+      // Force state to connected when we have a remote stream
+      if (callState === 'connecting') {
+        console.log('🔄 Forcing state change to connected');
+        setCallState('connected');
+      }
     }
-  }, [remoteStream]);
+  }, [remoteStream, callState]);
 
   const initiateCall = async () => {
     try {
@@ -46,8 +52,10 @@ function VisitorCall() {
       // Setup callbacks
       webrtcService.onRemoteStream = (stream) => {
         console.log('📹 Received homeowner stream');
+        console.log('Stream tracks:', stream.getTracks().length);
         setRemoteStream(stream);
         setCallState('connected');
+        console.log('✅ Call state set to connected');
       };
 
       webrtcService.onError = (errorMessage) => {
