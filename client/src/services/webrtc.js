@@ -143,15 +143,9 @@ class WebRTCService {
       // Join room
       this.socket.emit('join-room', qrCodeId);
 
-      // Wait a moment to ensure room is fully joined, then alert homeowner
-      setTimeout(() => {
-        console.log('🔔 Sending visitor alert to homeowner...');
-        this.socket.emit('visitor-alert', { 
-          qrCodeId,
-          timestamp: new Date().toISOString()
-        });
-      }, 1000); // 1 second delay to ensure room connection is established
-
+      // Set up listeners FIRST before sending anything
+      console.log('👂 VISITOR: Setting up answer and ICE candidate listeners');
+      
       // Listen for answer from homeowner
       this.socket.on('answer', async (data) => {
         console.log('📞📞📞 VISITOR: Received answer from homeowner!');
@@ -170,6 +164,7 @@ class WebRTCService {
       // Listen for ICE candidates
       this.socket.on('ice-candidate', async (data) => {
         if (data.candidate) {
+          console.log('🧊 VISITOR: Received ICE candidate');
           await this.peerConnection.addIceCandidate(
             new RTCIceCandidate(data.candidate)
           );
@@ -185,7 +180,16 @@ class WebRTCService {
         offer: offer
       });
 
-      console.log('📤 Sent offer to homeowner');
+      console.log('📤 VISITOR: Sent offer to homeowner');
+
+      // Wait a moment to ensure offer is sent, then alert homeowner
+      setTimeout(() => {
+        console.log('🔔 VISITOR: Sending visitor alert to homeowner...');
+        this.socket.emit('visitor-alert', { 
+          qrCodeId,
+          timestamp: new Date().toISOString()
+        });
+      }, 500); // Short delay to ensure offer is sent first
 
     } catch (error) {
       console.error('❌ Error starting call:', error);
