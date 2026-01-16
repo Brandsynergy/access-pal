@@ -69,12 +69,15 @@ function VisitorCall() {
       };
 
       webrtcService.onConnectionStateChange = (state) => {
-        console.log('Connection state:', state);
+        console.log('🔗 VISITOR Connection state changed to:', state);
         if (state === 'connected') {
+          console.log('✅ VISITOR: Setting call state to CONNECTED');
           setCallState('connected');
         } else if (state === 'connecting') {
+          console.log('⏳ VISITOR: Setting call state to CONNECTING');
           setCallState('connecting');
         } else if (state === 'failed') {
+          console.error('❌ VISITOR: Connection failed');
           setError('Connection failed. Please try again.');
           setCallState('error');
         }
@@ -228,6 +231,10 @@ function VisitorCall() {
       <div className="header">
         <h1>🚪 ACCESS PAL</h1>
         <p className="subtitle">Video Doorbell</p>
+      </div>
+      {/* DEBUG: Show current state */}
+      <div style={{position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.7)', color: 'white', padding: '5px 10px', borderRadius: '5px', fontSize: '12px', zIndex: 9999}}>
+        State: {callState} | Remote: {remoteStream ? remoteStream.getTracks().length + ' tracks' : 'none'}
       </div>
       {renderContent()}
     </div>
