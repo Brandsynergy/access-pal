@@ -26,15 +26,26 @@ class WebRTCService {
     if (this.socket) return this.socket;
     
     this.socket = io(API_URL, {
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      timeout: 20000,
+      // Keep connection alive
+      pingInterval: 5000,
+      pingTimeout: 10000
     });
 
     this.socket.on('connect', () => {
       console.log('✅ Socket connected:', this.socket.id);
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('❌ Socket disconnected');
+    this.socket.on('disconnect', (reason) => {
+      console.log('❌ Socket disconnected. Reason:', reason);
+      // Only trigger error if it's not a deliberate disconnect
+      if (reason === 'io server disconnect' || reason === 'transport close') {
+        console.warn('⚠️ Unexpected disconnect during call');
+      }
     });
 
     this.socket.on('error', (error) => {
@@ -150,14 +161,16 @@ class WebRTCService {
       this.socket.off('answer');
       this.socket.off('ice-candidate');
       
-      // Listen for answer from homeowner (use once to ensure it only fires one time)
-      this.socket.once('answer', async (data) => {
+      // Listen for answer from homeowner
+      // Use 'on' instead of 'once' to handle potential multiple events
+      this.socket.on('answer', async (data) => {
         console.log('📞📞📞 VISITOR: Received answer from homeowner!');
         console.log('Answer data:', data);
         
-        // VISUAL DEBUG: Show alert on phone
-        if (typeof alert !== 'undefined') {
-          setTimeout(() => alert('VISITOR: Answer received!'), 100);
+        // Check if we already have a remote description to avoid setting it twice
+        if (this.peerConnection.remoteDescription) {
+          console.log('⚠️ VISITOR: Remote description already set, ignoring duplicate answer');
+          return;
         }
         
         try {
@@ -165,19 +178,10 @@ class WebRTCService {
             new RTCSessionDescription(data.answer)
           );
           console.log('✅ VISITOR: Successfully set remote description from answer');
-          
-          // VISUAL DEBUG: Show success alert
-          if (typeof alert !== 'undefined') {
-            setTimeout(() => alert('VISITOR: Remote description set successfully!'), 100);
-          }
+          console.log('🔗 VISITOR: PeerConnection state:', this.peerConnection.connectionState);
+          console.log('🔗 VISITOR: Signaling state:', this.peerConnection.signalingState);
         } catch (error) {
           console.error('❌ VISITOR: Error setting remote description:', error);
-          
-          // VISUAL DEBUG: Show error alert
-          if (typeof alert !== 'undefined') {
-            setTimeout(() => alert('VISITOR ERROR: ' + error.message), 100);
-          }
-          
           if (this.onError) this.onError(error.message);
         }
       });
@@ -360,7 +364,13 @@ class WebRTCService {
   // Cleanup
   cleanup() {
     this.endCall();
+    
+    // Remove all socket listeners before disconnecting
     if (this.socket) {
+      this.socket.off('answer');
+      this.socket.off('ice-candidate');
+      this.socket.off('offer');
+      this.socket.off('call-ended');
       this.socket.disconnect();
       this.socket = null;
     }
