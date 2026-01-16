@@ -154,13 +154,30 @@ class WebRTCService {
       this.socket.once('answer', async (data) => {
         console.log('📞📞📞 VISITOR: Received answer from homeowner!');
         console.log('Answer data:', data);
+        
+        // VISUAL DEBUG: Show alert on phone
+        if (typeof alert !== 'undefined') {
+          setTimeout(() => alert('VISITOR: Answer received!'), 100);
+        }
+        
         try {
           await this.peerConnection.setRemoteDescription(
             new RTCSessionDescription(data.answer)
           );
           console.log('✅ VISITOR: Successfully set remote description from answer');
+          
+          // VISUAL DEBUG: Show success alert
+          if (typeof alert !== 'undefined') {
+            setTimeout(() => alert('VISITOR: Remote description set successfully!'), 100);
+          }
         } catch (error) {
           console.error('❌ VISITOR: Error setting remote description:', error);
+          
+          // VISUAL DEBUG: Show error alert
+          if (typeof alert !== 'undefined') {
+            setTimeout(() => alert('VISITOR ERROR: ' + error.message), 100);
+          }
+          
           if (this.onError) this.onError(error.message);
         }
       });
