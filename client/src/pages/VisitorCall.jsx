@@ -70,7 +70,25 @@ function VisitorCall() {
     // Update remote video element when stream changes
     if (remoteVideoRef.current && remoteStream) {
       console.log('📺 Setting remote video srcObject');
+      console.log('📺 Remote stream has', remoteStream.getTracks().length, 'tracks');
+      console.log('📺 Video element:', remoteVideoRef.current);
+      console.log('📺 Video tracks:', remoteStream.getVideoTracks());
+      console.log('📺 Audio tracks:', remoteStream.getAudioTracks());
+      
       remoteVideoRef.current.srcObject = remoteStream;
+      
+      // Force play after setting srcObject
+      remoteVideoRef.current.play().catch(err => {
+        console.error('❌ Error playing remote video:', err);
+      });
+      
+      // Check video track state
+      const videoTrack = remoteStream.getVideoTracks()[0];
+      if (videoTrack) {
+        console.log('🎬 Video track readyState:', videoTrack.readyState);
+        console.log('🎬 Video track enabled:', videoTrack.enabled);
+        console.log('🎬 Video track muted:', videoTrack.muted);
+      }
     }
   }, [remoteStream]);
 
@@ -80,10 +98,24 @@ function VisitorCall() {
       console.log('✅ Remote stream has tracks:', remoteStream.getTracks().length);
       if (callState === 'connecting') {
         console.log('🔄 Transitioning from connecting to connected');
-        setCallState('connected');
+        // Small delay to ensure DOM is ready
+        setTimeout(() => {
+          setCallState('connected');
+        }, 100);
       }
     }
   }, [remoteStream, callState]);
+
+  // Re-attach remote stream when video element appears after state change
+  useEffect(() => {
+    if (callState === 'connected' && remoteVideoRef.current && remoteStream) {
+      console.log('🔄 Re-attaching remote stream after connected state');
+      remoteVideoRef.current.srcObject = remoteStream;
+      remoteVideoRef.current.play().catch(err => {
+        console.error('❌ Error auto-playing video:', err);
+      });
+    }
+  }, [callState]);
 
   const initiateCall = async () => {
     try {
