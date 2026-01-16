@@ -7,8 +7,10 @@ function VisitorLanding() {
   const navigate = useNavigate();
 
   const handleStartCall = () => {
-    // Navigate to the actual video call page
-    navigate(`/call/${qrCodeId}`);
+    // Use window.location for better mobile Safari compatibility
+    const callUrl = `/call/${qrCodeId}`;
+    console.log('🚀 Navigating to:', callUrl);
+    window.location.href = callUrl;
   };
 
   return (
