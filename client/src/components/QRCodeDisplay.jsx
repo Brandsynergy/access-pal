@@ -153,9 +153,21 @@ const QRCodeDisplay = () => {
           <ol>
             <li>Print or display this QR code at your door</li>
             <li>Visitors scan it with their phone camera</li>
+            <li><strong>Visitors: Tap "Copy to Clipboard" then paste in browser</strong></li>
             <li>You receive an instant video call notification</li>
             <li>Answer from anywhere in the world!</li>
           </ol>
+        </div>
+        
+        {/* Mobile Visitor Instructions */}
+        <div className="visitor-instructions">
+          <h3>📱 For Visitors:</h3>
+          <div className="instruction-steps">
+            <div className="step">1️⃣ Scan QR Code</div>
+            <div className="step">2️⃣ Tap "Copy to Clipboard"</div>
+            <div className="step">3️⃣ Paste in Safari/Chrome</div>
+            <div className="step">4️⃣ Tap "Start Video Call"</div>
+          </div>
         </div>
       </div>
     </motion.div>
