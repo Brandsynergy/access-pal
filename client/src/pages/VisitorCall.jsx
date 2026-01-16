@@ -271,10 +271,6 @@ function VisitorCall() {
         <h1>🚪 ACCESS PAL</h1>
         <p className="subtitle">Video Doorbell</p>
       </div>
-      {/* DEBUG: Show current state */}
-      <div style={{position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.7)', color: 'white', padding: '5px 10px', borderRadius: '5px', fontSize: '12px', zIndex: 9999}}>
-        State: {callState} | Remote: {remoteStream ? remoteStream.getTracks().length + ' tracks' : 'none'}
-      </div>
       {renderContent()}
     </div>
   );
