@@ -28,26 +28,28 @@ export const CallProvider = ({ children }) => {
     // Request browser notification permission
     requestNotificationPermission();
 
-    // Setup WebRTC service callbacks
+    // Setup WebRTC service callbacks for HOMEOWNER
+    console.log('🏠 Setting up HOMEOWNER callbacks');
+    
     webrtcService.onRemoteStream = (stream) => {
-      console.log('📹 Setting remote stream');
+      console.log('📹 HOMEOWNER: Setting remote stream');
       setRemoteStream(stream);
       setCallState('in-call');
     };
 
     webrtcService.onCallEnded = () => {
-      console.log('📞 Call ended');
+      console.log('📞 HOMEOWNER: Call ended');
       handleCallEnd();
     };
 
     webrtcService.onError = (errorMessage) => {
-      console.error('❌ Call error:', errorMessage);
+      console.error('❌ HOMEOWNER: Call error:', errorMessage);
       setError(errorMessage);
       setCallState('ended');
     };
 
     webrtcService.onConnectionStateChange = (state) => {
-      console.log('🔗 Connection state:', state);
+      console.log('🔗 HOMEOWNER: Connection state:', state);
       setConnectionState(state);
       
       if (state === 'connected') {

@@ -73,7 +73,9 @@ function AppRoutes() {
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <CallProvider>
+              <Dashboard />
+            </CallProvider>
           </ProtectedRoute>
         } 
       />
@@ -89,9 +91,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <CallProvider>
-          <AppRoutes />
-        </CallProvider>
+        <AppRoutes />
       </AuthProvider>
     </BrowserRouter>
   );
