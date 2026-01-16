@@ -250,10 +250,25 @@ function VisitorCall() {
         );
 
       case 'error':
+        const isPermissionError = error && (error.includes('Permission') || error.includes('permission') || error.includes('denied') || error.includes('camera') || error.includes('microphone'));
+        
         return (
           <div className="call-status error">
-            <h2>❌ Error</h2>
+            <h2>❌ {isPermissionError ? 'Permission Denied' : 'Error'}</h2>
             <p>{error || 'Something went wrong'}</p>
+            
+            {isPermissionError && (
+              <div className="permission-help">
+                <h3>📱 How to Fix:</h3>
+                <ol>
+                  <li>Tap the 🔒 <strong>lock icon</strong> or <strong>ⓘ</strong> in your browser address bar</li>
+                  <li>Find <strong>"Permissions"</strong> or <strong>"Site settings"</strong></li>
+                  <li>Allow <strong>Camera</strong> and <strong>Microphone</strong></li>
+                  <li>Tap <strong>"Try Again"</strong> below</li>
+                </ol>
+              </div>
+            )}
+            
             <button onClick={initiateCall} className="retry-btn">
               Try Again
             </button>
