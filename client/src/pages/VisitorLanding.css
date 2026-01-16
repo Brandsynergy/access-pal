@@ -1,0 +1,213 @@
+.visitor-landing-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+.landing-content {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.welcome-card {
+  background: white;
+  border-radius: 30px;
+  padding: 50px 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  width: 100%;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Doorbell Icon */
+.doorbell-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Title */
+.welcome-card h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 10px 0;
+  letter-spacing: -1px;
+}
+
+.welcome-card .subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0 0 30px 0;
+  font-weight: 500;
+}
+
+/* Message */
+.message {
+  margin: 30px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 15px;
+}
+
+.message p {
+  margin: 10px 0;
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.message p:first-child {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+/* Start Call Button */
+.start-call-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 20px 40px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 30px 0;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.start-call-btn:hover {
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+  transform: translateY(-2px);
+}
+
+.start-call-btn:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  font-size: 1.5rem;
+}
+
+.btn-text {
+  font-size: 1.2rem;
+}
+
+/* Info Note */
+.info-note {
+  margin-top: 20px;
+  padding: 20px;
+  background: #fff9e6;
+  border-radius: 15px;
+  border: 2px solid #ffe066;
+}
+
+.info-note p {
+  margin: 8px 0;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Footer */
+.landing-footer {
+  margin-top: 30px;
+  text-align: center;
+  opacity: 0.8;
+}
+
+.landing-footer p {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .welcome-card {
+    padding: 40px 30px;
+  }
+
+  .welcome-card h1 {
+    font-size: 2rem;
+  }
+
+  .doorbell-icon {
+    font-size: 4rem;
+  }
+
+  .start-call-btn {
+    padding: 18px 30px;
+    font-size: 1.1rem;
+  }
+
+  .btn-text {
+    font-size: 1.1rem;
+  }
+
+  .message p:first-child {
+    font-size: 1.2rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .visitor-landing-page {
+    padding: 15px;
+  }
+
+  .welcome-card {
+    padding: 30px 20px;
+    border-radius: 20px;
+  }
+
+  .welcome-card h1 {
+    font-size: 1.8rem;
+  }
+
+  .doorbell-icon {
+    font-size: 3.5rem;
+  }
+
+  .start-call-btn {
+    padding: 15px 25px;
+  }
+}

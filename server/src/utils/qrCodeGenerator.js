@@ -11,9 +11,9 @@ export const generateUserQRCode = async (userId) => {
     // Create unique QR code ID
     const qrCodeId = `AP-${uuidv4()}`;
     
-    // Create the visitor call URL
+    // Create the visitor landing page URL (they tap button to start call)
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-    const visitorCallUrl = `${clientUrl}/call/${qrCodeId}`;
+    const visitorCallUrl = `${clientUrl}/visitor/${qrCodeId}`;
     
     // The QR code will encode the direct call URL
     const qrString = visitorCallUrl;

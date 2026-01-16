@@ -4,6 +4,7 @@ import { CallProvider } from './context/CallContext';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import VisitorLanding from './pages/VisitorLanding';
 import VisitorCall from './pages/VisitorCall';
 
 // Protected route component
@@ -78,6 +79,14 @@ function AppRoutes() {
             </CallProvider>
           </ProtectedRoute>
         } 
+      />
+      <Route 
+        path="/visitor/:qrCodeId" 
+        element={<VisitorLanding />} 
+      />
+      <Route 
+        path="/visitor/:qrCodeId" 
+        element={<VisitorLanding />} 
       />
       <Route 
         path="/call/:qrCodeId" 
