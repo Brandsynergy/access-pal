@@ -163,11 +163,18 @@ class WebRTCService {
 
       // Listen for ICE candidates
       this.socket.on('ice-candidate', async (data) => {
-        if (data.candidate) {
+        if (data.candidate && this.peerConnection) {
           console.log('🧊 VISITOR: Received ICE candidate');
-          await this.peerConnection.addIceCandidate(
-            new RTCIceCandidate(data.candidate)
-          );
+          try {
+            await this.peerConnection.addIceCandidate(
+              new RTCIceCandidate(data.candidate)
+            );
+            console.log('✅ VISITOR: Added ICE candidate');
+          } catch (error) {
+            console.error('❌ VISITOR: Error adding ICE candidate:', error);
+          }
+        } else if (!this.peerConnection) {
+          console.warn('⚠️ VISITOR: Received ICE candidate but peer connection is null');
         }
       });
 
@@ -234,10 +241,18 @@ class WebRTCService {
 
       // Listen for ICE candidates
       this.socket.on('ice-candidate', async (data) => {
-        if (data.candidate) {
-          await this.peerConnection.addIceCandidate(
-            new RTCIceCandidate(data.candidate)
-          );
+        if (data.candidate && this.peerConnection) {
+          console.log('🧊 HOMEOWNER: Received ICE candidate');
+          try {
+            await this.peerConnection.addIceCandidate(
+              new RTCIceCandidate(data.candidate)
+            );
+            console.log('✅ HOMEOWNER: Added ICE candidate');
+          } catch (error) {
+            console.error('❌ HOMEOWNER: Error adding ICE candidate:', error);
+          }
+        } else if (!this.peerConnection) {
+          console.warn('⚠️ HOMEOWNER: Received ICE candidate but peer connection is null');
         }
       });
 
