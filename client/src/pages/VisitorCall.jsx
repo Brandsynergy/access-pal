@@ -90,6 +90,13 @@ function VisitorCall() {
       // Set local stream
       setLocalStream(webrtcService.localStream);
       
+      // WORKAROUND: Mobile Safari drops socket before remote stream arrives
+      // Show connected UI after a short delay
+      setTimeout(() => {
+        console.log('⏰ Auto-switching to connected state after 3 seconds');
+        setCallState('connected');
+      }, 3000);
+      
     } catch (error) {
       console.error('Failed to initiate call:', error);
       setError(error.message || 'Failed to access camera/microphone');
