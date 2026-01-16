@@ -144,8 +144,26 @@ class WebRTCService {
       return this.localStream;
     } catch (error) {
       console.error('❌ Error accessing media devices:', error);
+      console.error('❌ Error name:', error.name);
+      console.error('❌ Error message:', error.message);
+      
+      let errorMessage = 'Permission denied';
+      
+      // Provide specific error messages based on error type
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorMessage = 'Permission denied - Please allow camera and microphone access';
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        errorMessage = 'No camera or microphone found on this device';
+      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+        errorMessage = 'Camera or microphone is already in use by another app';
+      } else if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
+        errorMessage = 'Camera settings not supported by your device';
+      } else if (error.name === 'SecurityError') {
+        errorMessage = 'Security error - Camera access blocked by browser';
+      }
+      
       if (this.onError) {
-        this.onError('Unable to access camera/microphone. Please grant permissions.');
+        this.onError(errorMessage);
       }
       throw error;
     }
