@@ -16,7 +16,41 @@ function VisitorCall() {
   const remoteVideoRef = useRef(null);
 
   useEffect(() => {
-    // Auto-initiate call when component mounts
+    // Setup callbacks FIRST before anything else
+    webrtcService.onRemoteStream = (stream) => {
+      console.log('📹 Received homeowner stream');
+      console.log('Stream tracks:', stream.getTracks().length);
+      setRemoteStream(stream);
+      setCallState('connected');
+      console.log('✅ Call state set to connected');
+    };
+
+    webrtcService.onError = (errorMessage) => {
+      console.error('❌ Call error:', errorMessage);
+      setError(errorMessage);
+      setCallState('error');
+    };
+
+    webrtcService.onCallEnded = () => {
+      setCallState('ended');
+    };
+
+    webrtcService.onConnectionStateChange = (state) => {
+      console.log('🔗 VISITOR Connection state changed to:', state);
+      if (state === 'connected') {
+        console.log('✅ VISITOR: Setting call state to CONNECTED');
+        setCallState('connected');
+      } else if (state === 'connecting') {
+        console.log('⏳ VISITOR: Setting call state to CONNECTING');
+        setCallState('connecting');
+      } else if (state === 'failed') {
+        console.error('❌ VISITOR: Connection failed');
+        setError('Connection failed. Please try again.');
+        setCallState('error');
+      }
+    };
+
+    // Now initiate the call
     initiateCall();
 
     return () => {
@@ -37,9 +71,15 @@ function VisitorCall() {
     if (remoteVideoRef.current && remoteStream) {
       console.log('📺 Setting remote video srcObject');
       remoteVideoRef.current.srcObject = remoteStream;
-      // Force state to connected when we have a remote stream
+    }
+  }, [remoteStream]);
+
+  // Separate effect to monitor remote stream tracks and transition state
+  useEffect(() => {
+    if (remoteStream && remoteStream.getTracks().length > 0) {
+      console.log('✅ Remote stream has tracks:', remoteStream.getTracks().length);
       if (callState === 'connecting') {
-        console.log('🔄 Forcing state change to connected');
+        console.log('🔄 Transitioning from connecting to connected');
         setCallState('connected');
       }
     }
@@ -49,40 +89,7 @@ function VisitorCall() {
     try {
       setCallState('requesting-permission');
       
-      // Setup callbacks
-      webrtcService.onRemoteStream = (stream) => {
-        console.log('📹 Received homeowner stream');
-        console.log('Stream tracks:', stream.getTracks().length);
-        setRemoteStream(stream);
-        setCallState('connected');
-        console.log('✅ Call state set to connected');
-      };
-
-      webrtcService.onError = (errorMessage) => {
-        console.error('❌ Call error:', errorMessage);
-        setError(errorMessage);
-        setCallState('error');
-      };
-
-      webrtcService.onCallEnded = () => {
-        setCallState('ended');
-      };
-
-      webrtcService.onConnectionStateChange = (state) => {
-        console.log('🔗 VISITOR Connection state changed to:', state);
-        if (state === 'connected') {
-          console.log('✅ VISITOR: Setting call state to CONNECTED');
-          setCallState('connected');
-        } else if (state === 'connecting') {
-          console.log('⏳ VISITOR: Setting call state to CONNECTING');
-          setCallState('connecting');
-        } else if (state === 'failed') {
-          console.error('❌ VISITOR: Connection failed');
-          setError('Connection failed. Please try again.');
-          setCallState('error');
-        }
-      };
-
+      // Callbacks are now set up in useEffect before this runs
       // Start the call
       setCallState('connecting');
       await webrtcService.startCall(qrCodeId);

@@ -77,6 +77,9 @@ class WebRTCService {
     // Handle remote stream
     this.peerConnection.ontrack = (event) => {
       console.log('📹 Received remote track:', event.track.kind);
+      console.log('📹 Track readyState:', event.track.readyState);
+      console.log('📹 Track enabled:', event.track.enabled);
+      
       if (!this.remoteStream) {
         this.remoteStream = new MediaStream();
         console.log('🆕 Created new MediaStream for remote tracks');
@@ -84,11 +87,26 @@ class WebRTCService {
       this.remoteStream.addTrack(event.track);
       console.log(`✅ Added ${event.track.kind} track. Total tracks:`, this.remoteStream.getTracks().length);
       
+      // Monitor track state
+      event.track.onended = () => {
+        console.log(`⚠️ Track ${event.track.kind} ended`);
+      };
+      
+      event.track.onmute = () => {
+        console.log(`🔇 Track ${event.track.kind} muted`);
+      };
+      
+      event.track.onunmute = () => {
+        console.log(`🔊 Track ${event.track.kind} unmuted`);
+      };
+      
       // Call the callback every time we get a track
       // The UI will update when it sees a stream with tracks
       if (this.onRemoteStream) {
-        console.log('📡 Calling onRemoteStream callback');
+        console.log('📡 Calling onRemoteStream callback with stream having', this.remoteStream.getTracks().length, 'tracks');
         this.onRemoteStream(this.remoteStream);
+      } else {
+        console.warn('⚠️ onRemoteStream callback not set!');
       }
     };
 
