@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import './VisitorLanding.css';
@@ -5,6 +6,24 @@ import './VisitorLanding.css';
 function VisitorLanding() {
   const { qrCodeId } = useParams();
   const navigate = useNavigate();
+  const [isRestrictedBrowser, setIsRestrictedBrowser] = useState(false);
+
+  useEffect(() => {
+    // Detect if running in restricted browser (Google Lens, Facebook, Instagram, etc.)
+    const userAgent = navigator.userAgent || '';
+    const isInApp = userAgent.includes('wv') || // WebView
+                    userAgent.includes('Instagram') ||
+                    userAgent.includes('FBAN') || // Facebook
+                    userAgent.includes('FBAV') ||
+                    !navigator.mediaDevices || // No media devices API
+                    (window.location !== window.parent.location); // In iframe
+    
+    setIsRestrictedBrowser(isInApp);
+    
+    if (isInApp) {
+      console.log('⚠️ Detected restricted browser/WebView');
+    }
+  }, []);
 
   const handleStartCall = () => {
     // Go directly to call - simpler is better
@@ -36,6 +55,19 @@ function VisitorLanding() {
             <p>👋 Welcome!</p>
             <p>You're about to connect with the homeowner via video call.</p>
           </div>
+
+          {/* Warning for restricted browsers */}
+          {isRestrictedBrowser && (
+            <div className="browser-warning">
+              <h3>⚠️ Important!</h3>
+              <p><strong>Please open this page in your Chrome browser</strong></p>
+              <ol>
+                <li>Tap the menu (⋮) at the top</li>
+                <li>Select "Open in Chrome" or "Open in Browser"</li>
+              </ol>
+              <p className="warning-note">Video calls don't work in Google Lens or in-app browsers</p>
+            </div>
+          )}
 
           {/* Big Call Button */}
           <motion.button

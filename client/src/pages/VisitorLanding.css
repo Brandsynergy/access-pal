@@ -147,6 +147,46 @@
   font-weight: 500;
 }
 
+/* Browser Warning */
+.browser-warning {
+  background: #fff3cd;
+  border: 3px solid #ffc107;
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.browser-warning h3 {
+  color: #856404;
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+}
+
+.browser-warning p {
+  color: #856404;
+  margin: 10px 0;
+  font-size: 0.95rem;
+}
+
+.browser-warning ol {
+  margin: 12px 0;
+  padding-left: 20px;
+  color: #856404;
+}
+
+.browser-warning li {
+  margin: 6px 0;
+  font-weight: 500;
+}
+
+.warning-note {
+  font-size: 0.85rem !important;
+  color: #666 !important;
+  margin-top: 12px !important;
+  font-style: italic;
+}
+
 /* Footer */
 .landing-footer {
   margin-top: 30px;
