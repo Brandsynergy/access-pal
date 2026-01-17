@@ -131,7 +131,19 @@ function VisitorCall() {
       
     } catch (error) {
       console.error('Failed to initiate call:', error);
-      setError(error.message || 'Failed to access camera/microphone');
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      
+      // Show detailed error to user
+      let errorMsg = error.message || 'Failed to access camera/microphone';
+      if (error.name === 'NotAllowedError') {
+        errorMsg = 'Camera/microphone access denied. Please check your browser settings.';
+      } else if (error.name === 'NotReadableError') {
+        errorMsg = 'Camera is being used by another app. Please close other camera apps.';
+      }
+      
+      setError(errorMsg);
       setCallState('error');
     }
   };

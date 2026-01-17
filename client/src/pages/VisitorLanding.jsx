@@ -7,10 +7,10 @@ function VisitorLanding() {
   const navigate = useNavigate();
 
   const handleStartCall = () => {
-    // Go to permission prep page first (better Android compatibility)
-    const prepUrl = `/prep/${qrCodeId}`;
-    console.log('🚀 Navigating to prep page:', prepUrl);
-    window.location.href = prepUrl;
+    // Go directly to call - simpler is better
+    const callUrl = `/call/${qrCodeId}`;
+    console.log('🚀 Starting call directly:', callUrl);
+    window.location.href = callUrl;
   };
 
   return (
