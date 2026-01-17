@@ -19,7 +19,7 @@ export const register = async (req, res) => {
     }
 
     // Generate QR code for the new user
-    const { qrCodeId, qrCodeImage } = await generateUserQRCode(email);
+    const { qrCodeId, qrCodeImage, lastFourDigits } = await generateUserQRCode(email);
 
     // Create user
     const user = await User.create({
@@ -28,7 +28,8 @@ export const register = async (req, res) => {
       name,
       phoneNumber,
       qrCodeId,
-      qrCodeImage
+      qrCodeImage,
+      lastFourDigits
     });
 
     // Generate JWT token
@@ -165,11 +166,17 @@ export const regenerateQRCode = async (req, res) => {
     }
 
     // Generate new QR code
-    const { qrCodeId, qrCodeImage } = await generateUserQRCode(user.id);
+    const { qrCodeId, qrCodeImage, lastFourDigits } = await generateUserQRCode(user.id);
 
-    // Update user
+    // Update user - reset activation when regenerating
     user.qrCodeId = qrCodeId;
     user.qrCodeImage = qrCodeImage;
+    user.lastFourDigits = lastFourDigits;
+    user.isQrActivated = false; // Require reactivation
+    user.activationDeviceFingerprint = null;
+    user.activationLatitude = null;
+    user.activationLongitude = null;
+    user.activatedAt = null;
     await user.save();
 
     res.json({

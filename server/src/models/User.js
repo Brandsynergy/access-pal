@@ -44,6 +44,39 @@ const User = sequelize.define('User', {
   deviceToken: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  // Activation security fields
+  lastFourDigits: {
+    type: DataTypes.STRING(4),
+    allowNull: true
+  },
+  isQrActivated: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  activationDeviceFingerprint: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  activationLatitude: {
+    type: DataTypes.FLOAT,
+    allowNull: true
+  },
+  activationLongitude: {
+    type: DataTypes.FLOAT,
+    allowNull: true
+  },
+  activatedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  scanCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  lastScannedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   timestamps: true,

@@ -31,10 +31,14 @@ export const generateUserQRCode = async (userId) => {
       width: 400
     });
     
+    // Extract last 4 characters for activation security
+    const lastFourDigits = qrCodeId.slice(-4);
+    
     return {
       qrCodeId,
       qrCodeImage,
-      visitorCallUrl: qrString
+      visitorCallUrl: qrString,
+      lastFourDigits
     };
   } catch (error) {
     console.error('QR Code generation error:', error);
