@@ -1,5 +1,6 @@
 import QRCode from 'qrcode';
 import { v4 as uuidv4 } from 'uuid';
+import { createCanvas, loadImage } from 'canvas';
 
 /**
  * Generate a unique QR code for a user
@@ -18,10 +19,13 @@ export const generateUserQRCode = async (userId) => {
     // The QR code will encode the direct call URL
     const qrString = visitorCallUrl;
     
-    // Generate QR code as base64 image
-    const qrCodeImage = await QRCode.toDataURL(qrString, {
+    // Extract last 4 characters for activation security
+    const lastFourDigits = qrCodeId.slice(-4);
+    
+    // Generate base QR code as buffer
+    const qrBuffer = await QRCode.toBuffer(qrString, {
       errorCorrectionLevel: 'H',
-      type: 'image/png',
+      type: 'png',
       quality: 1,
       margin: 2,
       color: {
@@ -31,8 +35,32 @@ export const generateUserQRCode = async (userId) => {
       width: 400
     });
     
-    // Extract last 4 characters for activation security
-    const lastFourDigits = qrCodeId.slice(-4);
+    // Load QR code into canvas
+    const qrImage = await loadImage(qrBuffer);
+    
+    // Create canvas with extra space for text
+    const canvas = createCanvas(450, 500);
+    const ctx = canvas.getContext('2d');
+    
+    // Fill white background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, 450, 500);
+    
+    // Draw QR code centered
+    ctx.drawImage(qrImage, 25, 25, 400, 400);
+    
+    // Add text at bottom
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('ACCESS PAL', 225, 450);
+    
+    ctx.font = 'bold 20px monospace';
+    ctx.fillStyle = '#667eea';
+    ctx.fillText(`Code: ${lastFourDigits}`, 225, 480);
+    
+    // Convert canvas to base64
+    const qrCodeImage = canvas.toDataURL('image/png');
     
     return {
       qrCodeId,
