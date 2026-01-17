@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import './CallPrep.css';
@@ -7,8 +7,37 @@ function CallPrep() {
   const { qrCodeId } = useParams();
   const navigate = useNavigate();
   const [permissionGranted, setPermissionGranted] = useState(false);
-  const [checking, setChecking] = useState(false);
+  const [checking, setChecking] = useState(true); // Start as checking
   const [error, setError] = useState(null);
+
+  // Check permissions on mount
+  useEffect(() => {
+    checkExistingPermissions();
+  }, []);
+
+  const checkExistingPermissions = async () => {
+    try {
+      // Check if permissions already granted
+      const result = await navigator.permissions.query({ name: 'camera' });
+      
+      if (result.state === 'granted') {
+        console.log('✅ Permissions already granted, proceeding to call');
+        setPermissionGranted(true);
+        // Go directly to call
+        setTimeout(() => {
+          navigate(`/call/${qrCodeId}`);
+        }, 500);
+        return;
+      }
+      
+      console.log('⚠️ Permissions not granted yet, showing request button');
+      setChecking(false);
+    } catch (err) {
+      // Permission API not supported or error, show button
+      console.log('⚠️ Permission check not supported, showing button');
+      setChecking(false);
+    }
+  };
 
   const checkPermissions = async () => {
     setChecking(true);
