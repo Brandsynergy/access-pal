@@ -32,49 +32,72 @@ function VisitorLanding() {
   }, []);
 
   const checkActivationStatus = async () => {
+    console.log('🔍 Checking activation status for:', qrCodeId);
+    
+    // First check if activated without location (faster)
     try {
-      // Get current location
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
+      const response = await api.get(`/api/qr/check/${qrCodeId}`);
+      console.log('✅ Activation check response:', response.data);
 
-          const response = await api.get(`/api/qr/check/${qrCodeId}?latitude=${latitude}&longitude=${longitude}`);
+      if (response.data.success) {
+        const { data } = response.data;
 
-          if (response.data.success) {
-            const { data } = response.data;
+        // Not activated - redirect to activation page
+        if (!data.isActivated) {
+          console.log('⚠️ QR not activated, redirecting to activation page');
+          navigate(`/activate/${qrCodeId}`);
+          return;
+        }
 
-            // Not activated - redirect to activation page
-            if (!data.isActivated) {
-              navigate(`/activate/${qrCodeId}`);
-              return;
-            }
-
-            // Activated but location invalid
-            if (!data.locationValid) {
-              setActivationError(data.message || 'This QR code is registered at a different location.');
-              setCheckingActivation(false);
-              return;
-            }
-
-            // All good - allow access
-            setCheckingActivation(false);
-          } else {
-            setActivationError(response.data.data?.message || 'Unable to verify QR code.');
-            setCheckingActivation(false);
-          }
-        },
-        (error) => {
-          console.error('Location error:', error);
-          // If location fails, still allow but log it
-          setCheckingActivation(false);
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
+        // QR is activated, now check location
+        console.log('✅ QR is activated, checking location...');
+        checkLocation();
+      } else {
+        console.error('❌ Activation check failed:', response.data);
+        setActivationError(response.data.message || 'Unable to verify QR code.');
+        setCheckingActivation(false);
+      }
     } catch (err) {
-      console.error('Activation check error:', err);
+      console.error('❌ Activation check error:', err);
       // If check fails, allow access (fail open for better UX)
       setCheckingActivation(false);
     }
+  };
+
+  const checkLocation = () => {
+    if (!navigator.geolocation) {
+      console.log('⚠️ Geolocation not supported, allowing access');
+      setCheckingActivation(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          console.log('📍 Location obtained:', latitude, longitude);
+
+          const response = await api.get(`/api/qr/check/${qrCodeId}?latitude=${latitude}&longitude=${longitude}`);
+
+          if (response.data.success && response.data.data.locationValid === false) {
+            console.log('❌ Location invalid');
+            setActivationError(response.data.data.message || 'This QR code is registered at a different location.');
+          } else {
+            console.log('✅ Location valid, access granted');
+          }
+        } catch (err) {
+          console.error('Location validation error:', err);
+        } finally {
+          setCheckingActivation(false);
+        }
+      },
+      (error) => {
+        console.error('Location error:', error.message);
+        // If location fails, still allow access
+        setCheckingActivation(false);
+      },
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
   };
 
   const handleStartCall = () => {
