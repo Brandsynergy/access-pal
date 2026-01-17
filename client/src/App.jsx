@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import VisitorLanding from './pages/VisitorLanding';
+import CallPrep from './pages/CallPrep';
 import VisitorCall from './pages/VisitorCall';
 
 // Protected route component
@@ -87,6 +88,10 @@ function AppRoutes() {
       <Route 
         path="/visitor/:qrCodeId" 
         element={<VisitorLanding />} 
+      />
+      <Route 
+        path="/prep/:qrCodeId" 
+        element={<CallPrep />} 
       />
       <Route 
         path="/call/:qrCodeId" 

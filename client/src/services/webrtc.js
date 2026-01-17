@@ -128,8 +128,12 @@ class WebRTCService {
 
   // Get local media stream (camera + microphone)
   async getLocalStream() {
-    try {
-      this.localStream = await navigator.mediaDevices.getUserMedia({
+    console.log('📹 Attempting to get camera/microphone access...');
+    
+    // Try multiple strategies for maximum compatibility
+    const strategies = [
+      // Strategy 1: Full quality (ideal for modern devices)
+      {
         video: { 
           width: { ideal: 1280 },
           height: { ideal: 720 }
@@ -138,32 +142,77 @@ class WebRTCService {
           echoCancellation: true,
           noiseSuppression: true
         }
-      });
+      },
+      // Strategy 2: Lower quality (for older devices)
+      {
+        video: { 
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        },
+        audio: true
+      },
+      // Strategy 3: Basic (maximum compatibility)
+      {
+        video: true,
+        audio: true
+      },
+      // Strategy 4: Video only (if audio fails)
+      {
+        video: true,
+        audio: false
+      }
+    ];
 
-      console.log('✅ Got local stream');
-      return this.localStream;
-    } catch (error) {
-      console.error('❌ Error accessing media devices:', error);
-      console.error('❌ Error name:', error.name);
-      console.error('❌ Error message:', error.message);
+    for (let i = 0; i < strategies.length; i++) {
+      try {
+        console.log(`📹 Trying strategy ${i + 1}/${strategies.length}`);
+        this.localStream = await navigator.mediaDevices.getUserMedia(strategies[i]);
+        console.log('✅ Got local stream with strategy', i + 1);
+        return this.localStream;
+      } catch (err) {
+        console.log(`❌ Strategy ${i + 1} failed:`, err.name);
+        // Try next strategy
+        if (i === strategies.length - 1) {
+          // All strategies failed
+          throw err;
+        }
+      }
+    }
+    
+    // If we get here, all strategies failed
+    const error = new Error('Failed to access camera/microphone');
+    console.error('❌ Error accessing media devices - all strategies failed');
+    
+    if (this.onError) {
+      this.onError('Unable to access camera or microphone. Please check your browser permissions.');
+    }
+    throw error;
+  }
+  
+  // Legacy fallback for very old browsers
+  async getLegacyStream() {
+    try {
+      // Try getUserMedia with older API
+      const getUserMedia = navigator.getUserMedia || 
+                          navigator.webkitGetUserMedia || 
+                          navigator.mozGetUserMedia ||
+                          navigator.msGetUserMedia;
       
-      let errorMessage = 'Permission denied';
-      
-      // Provide specific error messages based on error type
-      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        errorMessage = 'Permission denied - Please allow camera and microphone access';
-      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        errorMessage = 'No camera or microphone found on this device';
-      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-        errorMessage = 'Camera or microphone is already in use by another app';
-      } else if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
-        errorMessage = 'Camera settings not supported by your device';
-      } else if (error.name === 'SecurityError') {
-        errorMessage = 'Security error - Camera access blocked by browser';
+      if (!getUserMedia) {
+        throw new Error('getUserMedia not supported');
       }
       
+      return new Promise((resolve, reject) => {
+        getUserMedia.call(navigator, 
+          { video: true, audio: true },
+          resolve,
+          reject
+        );
+      });
+    } catch (error) {
+      console.error('❌ Legacy stream failed:', error);
       if (this.onError) {
-        this.onError(errorMessage);
+        this.onError('Your browser does not support video calls');
       }
       throw error;
     }

@@ -7,10 +7,10 @@ function VisitorLanding() {
   const navigate = useNavigate();
 
   const handleStartCall = () => {
-    // Use window.location for better mobile Safari compatibility
-    const callUrl = `/call/${qrCodeId}`;
-    console.log('🚀 Navigating to:', callUrl);
-    window.location.href = callUrl;
+    // Go to permission prep page first (better Android compatibility)
+    const prepUrl = `/prep/${qrCodeId}`;
+    console.log('🚀 Navigating to prep page:', prepUrl);
+    window.location.href = prepUrl;
   };
 
   return (
