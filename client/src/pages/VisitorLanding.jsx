@@ -59,13 +59,15 @@ function VisitorLanding() {
           {/* Warning for restricted browsers */}
           {isRestrictedBrowser && (
             <div className="browser-warning">
-              <h3>⚠️ Important!</h3>
-              <p><strong>Please open this page in your Chrome browser</strong></p>
+              <h3>⚠️ Important - Android Users!</h3>
+              <p><strong>Google Lens browser doesn't support video calls</strong></p>
+              <p><strong>Please share/open in Firefox or Chrome:</strong></p>
               <ol>
-                <li>Tap the menu (⋮) at the top</li>
-                <li>Select "Open in Chrome" or "Open in Browser"</li>
+                <li>Tap the <strong>Share</strong> button</li>
+                <li>Select <strong>"Firefox"</strong> (recommended) or <strong>"Chrome"</strong></li>
               </ol>
-              <p className="warning-note">Video calls don't work in Google Lens or in-app browsers</p>
+              <p className="warning-tip">👉 <strong>Firefox works best on Android!</strong></p>
+              <p className="warning-note">Or tap menu (⋮) → "Open in browser"</p>
             </div>
           )}
 

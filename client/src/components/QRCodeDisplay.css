@@ -169,6 +169,16 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.android-tip {
+  margin-top: 16px;
+  padding: 12px;
+  background: #d4edda;
+  border: 2px solid #28a745;
+  border-radius: 10px;
+  color: #155724;
+  font-size: 0.95rem;
+}
+
 @media (max-width: 768px) {
   .qr-display-card {
     padding: 24px;

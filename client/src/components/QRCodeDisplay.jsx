@@ -164,10 +164,10 @@ const QRCodeDisplay = () => {
           <h3>📱 For Visitors:</h3>
           <div className="instruction-steps">
             <div className="step">1️⃣ Scan QR Code</div>
-            <div className="step">2️⃣ Tap "Copy to Clipboard"</div>
-            <div className="step">3️⃣ Paste in Safari/Chrome</div>
-            <div className="step">4️⃣ Tap "Start Video Call"</div>
+            <div className="step">2️⃣ Share to Firefox (Android) or Safari (iPhone)</div>
+            <div className="step">3️⃣ Tap "Start Video Call"</div>
           </div>
+          <p className="android-tip">👉 <strong>Android users:</strong> Firefox works best!</p>
         </div>
       </div>
     </motion.div>
