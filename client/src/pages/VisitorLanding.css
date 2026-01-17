@@ -198,6 +198,48 @@
   font-style: italic;
 }
 
+/* Activation Error */
+.activation-error {
+  background: #fee;
+  border: 2px solid #fcc;
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  color: #c33;
+}
+
+.activation-error h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+}
+
+.activation-error p {
+  margin: 10px 0;
+  font-size: 0.95rem;
+}
+
+.activation-error .error-note {
+  font-size: 0.85rem !important;
+  color: #999 !important;
+  margin-top: 15px !important;
+  font-style: italic;
+}
+
+/* Spinner */
+.spinner-small {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Footer */
 .landing-footer {
   margin-top: 30px;

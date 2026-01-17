@@ -92,6 +92,36 @@
   font-size: 14px;
 }
 
+.activation-code {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
+}
+
+.status-badge.activated {
+  background: #d4edda;
+  color: #155724;
+  border: 2px solid #28a745;
+}
+
+.status-badge.not-activated {
+  background: #fff3cd;
+  color: #856404;
+  border: 2px solid #ffc107;
+}
+
 .qr-actions {
   display: flex;
   flex-direction: column;

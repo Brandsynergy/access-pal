@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
+import qrActivationRoutes from './routes/qrActivationRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -49,6 +50,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/qr', qrActivationRoutes);
 
 // WebRTC signaling via Socket.IO
 io.on('connection', (socket) => {

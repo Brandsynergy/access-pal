@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import './QRCodeDisplay.css';
 
 const QRCodeDisplay = () => {
   const { user, regenerateQRCode } = useAuth();
   const [downloading, setDownloading] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [activationDetails, setActivationDetails] = useState(null);
+  const [loadingActivation, setLoadingActivation] = useState(true);
 
   const handleDownload = () => {
     setDownloading(true);
@@ -23,7 +26,7 @@ const QRCodeDisplay = () => {
   };
 
   const handleRegenerate = async () => {
-    if (!window.confirm('Are you sure? Your old QR code will no longer work.')) {
+    if (!window.confirm('Are you sure? Your old QR code will no longer work and will need to be reactivated.')) {
       return;
     }
     
@@ -31,12 +34,35 @@ const QRCodeDisplay = () => {
     const result = await regenerateQRCode();
     
     if (result.success) {
-      alert('QR code regenerated successfully!');
+      alert('QR code regenerated successfully! You will need to activate it again.');
+      // Refetch activation details
+      fetchActivationDetails();
     } else {
       alert(result.message);
     }
     
     setRegenerating(false);
+  };
+
+  useEffect(() => {
+    fetchActivationDetails();
+  }, []);
+
+  const fetchActivationDetails = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await api.get('/api/qr/details', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.success) {
+        setActivationDetails(response.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching activation details:', err);
+    } finally {
+      setLoadingActivation(false);
+    }
   };
 
   const handlePrint = () => {
@@ -118,6 +144,34 @@ const QRCodeDisplay = () => {
             <span className="info-label">Linked to:</span>
             <span className="info-value">{user.email}</span>
           </div>
+          {!loadingActivation && activationDetails && (
+            <>
+              <div className="info-item">
+                <span className="info-label">Activation Code:</span>
+                <span className="info-value activation-code">{activationDetails.lastFourDigits}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Status:</span>
+                <span className={`info-value status-badge ${activationDetails.isActivated ? 'activated' : 'not-activated'}`}>
+                  {activationDetails.isActivated ? '✅ Activated' : '⚠️ Not Activated'}
+                </span>
+              </div>
+              {activationDetails.isActivated && (
+                <>
+                  <div className="info-item">
+                    <span className="info-label">Scans:</span>
+                    <span className="info-value">{activationDetails.scanCount || 0} scans</span>
+                  </div>
+                  {activationDetails.lastScannedAt && (
+                    <div className="info-item">
+                      <span className="info-label">Last Scanned:</span>
+                      <span className="info-value">{new Date(activationDetails.lastScannedAt).toLocaleString()}</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
         </div>
 
         <div className="qr-actions">
@@ -151,11 +205,11 @@ const QRCodeDisplay = () => {
         <div className="qr-instructions">
           <h3>How to Use:</h3>
           <ol>
-            <li>Print or display this QR code at your door</li>
-            <li>Visitors scan it with their phone camera</li>
-            <li><strong>Visitors: Tap "Copy to Clipboard" then paste in browser</strong></li>
-            <li>You receive an instant video call notification</li>
-            <li>Answer from anywhere in the world!</li>
+            <li>Print this QR code and stick it on your door</li>
+            <li><strong>Important:</strong> Print the activation code <span style={{ background: 'white', color: '#667eea', padding: '2px 8px', borderRadius: '4px', fontWeight: '800' }}>{activationDetails?.lastFourDigits || 'XXXX'}</span> on the back</li>
+            <li>First scan: Visitor enters the 4-digit code to activate</li>
+            <li>QR code locks to that location (≈ 1 mile radius)</li>
+            <li>Subsequent scans: Video call works automatically!</li>
           </ol>
         </div>
         

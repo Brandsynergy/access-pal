@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import api from '../services/api';
 import './VisitorLanding.css';
 
 function VisitorLanding() {
   const { qrCodeId } = useParams();
   const navigate = useNavigate();
   const [isRestrictedBrowser, setIsRestrictedBrowser] = useState(false);
+  const [checkingActivation, setCheckingActivation] = useState(true);
+  const [activationError, setActivationError] = useState('');
 
   useEffect(() => {
     // Detect if running in restricted browser (Google Lens, Facebook, Instagram, etc.)
@@ -23,7 +26,56 @@ function VisitorLanding() {
     if (isInApp) {
       console.log('⚠️ Detected restricted browser/WebView');
     }
+
+    // Check activation status
+    checkActivationStatus();
   }, []);
+
+  const checkActivationStatus = async () => {
+    try {
+      // Get current location
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          const response = await api.get(`/api/qr/check/${qrCodeId}?latitude=${latitude}&longitude=${longitude}`);
+
+          if (response.data.success) {
+            const { data } = response.data;
+
+            // Not activated - redirect to activation page
+            if (!data.isActivated) {
+              navigate(`/activate/${qrCodeId}`);
+              return;
+            }
+
+            // Activated but location invalid
+            if (!data.locationValid) {
+              setActivationError(data.message || 'This QR code is registered at a different location.');
+              setCheckingActivation(false);
+              return;
+            }
+
+            // All good - allow access
+            setCheckingActivation(false);
+          } else {
+            setActivationError(response.data.data?.message || 'Unable to verify QR code.');
+            setCheckingActivation(false);
+          }
+        },
+        (error) => {
+          console.error('Location error:', error);
+          // If location fails, still allow but log it
+          setCheckingActivation(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } catch (err) {
+      console.error('Activation check error:', err);
+      // If check fails, allow access (fail open for better UX)
+      setCheckingActivation(false);
+    }
+  };
 
   const handleStartCall = () => {
     // Go directly to call - simpler is better
@@ -51,10 +103,23 @@ function VisitorLanding() {
           <p className="subtitle">Video Doorbell</p>
 
           {/* Message */}
-          <div className="message">
-            <p>👋 Welcome!</p>
-            <p>You're about to connect with the homeowner via video call.</p>
-          </div>
+          {checkingActivation ? (
+            <div className="message">
+              <div className="spinner-small" style={{ margin: '20px auto' }}></div>
+              <p>Verifying QR code...</p>
+            </div>
+          ) : activationError ? (
+            <div className="activation-error">
+              <h3>❌ Access Denied</h3>
+              <p>{activationError}</p>
+              <p className="error-note">Please contact the homeowner for assistance.</p>
+            </div>
+          ) : (
+            <div className="message">
+              <p>👋 Welcome!</p>
+              <p>You're about to connect with the homeowner via video call.</p>
+            </div>
+          )}
 
           {/* Warning for restricted browsers */}
           {isRestrictedBrowser && (
@@ -72,15 +137,18 @@ function VisitorLanding() {
           )}
 
           {/* Big Call Button */}
-          <motion.button
-            className="start-call-btn"
-            onClick={handleStartCall}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <span className="btn-icon">📞</span>
-            <span className="btn-text">Start Video Call</span>
-          </motion.button>
+          {!activationError && (
+            <motion.button
+              className="start-call-btn"
+              onClick={handleStartCall}
+              disabled={checkingActivation}
+              whileHover={{ scale: checkingActivation ? 1 : 1.05 }}
+              whileTap={{ scale: checkingActivation ? 1 : 0.95 }}
+            >
+              <span className="btn-icon">📞</span>
+              <span className="btn-text">Start Video Call</span>
+            </motion.button>
+          )}
 
           {/* Info */}
           <div className="info-note">

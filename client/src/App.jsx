@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import VisitorLanding from './pages/VisitorLanding';
+import QRActivation from './pages/QRActivation';
 import CallPrep from './pages/CallPrep';
 import VisitorCall from './pages/VisitorCall';
 
@@ -86,8 +87,8 @@ function AppRoutes() {
         element={<VisitorLanding />} 
       />
       <Route 
-        path="/visitor/:qrCodeId" 
-        element={<VisitorLanding />} 
+        path="/activate/:qrCodeId" 
+        element={<QRActivation />} 
       />
       <Route 
         path="/prep/:qrCodeId" 
