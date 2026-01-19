@@ -13,8 +13,10 @@ function QRActivation() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(true);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
+    console.log('🔐 QR Activation page loaded for:', qrCodeId);
     // Get user's location on mount
     getLocation();
   }, []);
@@ -94,8 +96,16 @@ function QRActivation() {
       });
 
       if (response.data.success) {
-        // Activation successful! Redirect to visitor landing page
-        navigate(`/visitor/${qrCodeId}`);
+        console.log('✅ Activation successful!');
+        // Show success message
+        setSuccess(true);
+        setLoading(false);
+        
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          console.log('➡️ Redirecting to visitor landing page...');
+          navigate(`/visitor/${qrCodeId}`);
+        }, 3000);
       }
     } catch (err) {
       console.error('Activation error:', err);
@@ -125,10 +135,18 @@ function QRActivation() {
           <h1>ACCESS PAL</h1>
           <p className="subtitle">Activate Your QR Code</p>
 
-          <div className="activation-message">
-            <p>🎉 First time setup!</p>
-            <p>Enter the <strong>last 4 digits</strong> printed on the back of your QR code sticker.</p>
-          </div>
+          {success ? (
+            <div className="activation-message" style={{ background: '#d4edda', border: '2px solid #28a745' }}>
+              <p>✅ QR Code Activated Successfully!</p>
+              <p>Your QR code is now locked to this location.</p>
+              <p>Redirecting...</p>
+            </div>
+          ) : (
+            <div className="activation-message">
+              <p>🎉 First time setup!</p>
+              <p>Enter the <strong>last 4 digits</strong> printed on the back of your QR code sticker.</p>
+            </div>
+          )}
 
           {gettingLocation && (
             <div className="location-status">
@@ -137,13 +155,14 @@ function QRActivation() {
             </div>
           )}
 
-          {!gettingLocation && location && (
+          {!gettingLocation && location && !success && (
             <div className="location-status success">
               <p>📍 Location captured</p>
             </div>
           )}
 
-          <div className="digit-inputs">
+          {!success && (
+            <div className="digit-inputs">
             {digits.map((digit, index) => (
               <input
                 key={index}
@@ -159,22 +178,25 @@ function QRActivation() {
               />
             ))}
           </div>
+          )}
 
-          {error && (
+          {error && !success && (
             <div className="activation-error">
               <p>❌ {error}</p>
             </div>
           )}
 
-          <motion.button
-            className="activate-btn"
-            onClick={handleActivate}
-            disabled={loading || gettingLocation || !location}
-            whileHover={{ scale: loading ? 1 : 1.05 }}
-            whileTap={{ scale: loading ? 1 : 0.95 }}
-          >
-            {loading ? 'Activating...' : 'Activate QR Code'}
-          </motion.button>
+          {!success && (
+            <motion.button
+              className="activate-btn"
+              onClick={handleActivate}
+              disabled={loading || gettingLocation || !location}
+              whileHover={{ scale: loading ? 1 : 1.05 }}
+              whileTap={{ scale: loading ? 1 : 0.95 }}
+            >
+              {loading ? 'Activating...' : 'Activate QR Code'}
+            </motion.button>
+          )}
 
           <div className="activation-info">
             <p>🔒 This QR code will be locked to this location</p>
