@@ -34,6 +34,8 @@ Your smart video doorbell solution that works anywhere in the world.
    - Your password
    - Your unique QR code
 2. Go to: **https://access-pal-1.onrender.com**
+   - **If link doesn't work:** Try private/incognito browser window
+   - **Or clear your browser cache:** Settings → Privacy → Clear browsing data
 3. Log in with the credentials provided
 4. Keep this page open to receive calls
 
