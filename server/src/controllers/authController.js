@@ -7,7 +7,7 @@ import { generateUserQRCode, generatePrintableSticker } from '../utils/qrCodeGen
  */
 export const register = async (req, res) => {
   try {
-    const { email, password, name, phoneNumber } = req.body;
+    const { email, password, name, phoneNumber, address } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
@@ -27,6 +27,7 @@ export const register = async (req, res) => {
       password,
       name,
       phoneNumber,
+      address,
       qrCodeId,
       qrCodeImage,
       lastFourDigits
@@ -48,6 +49,7 @@ export const register = async (req, res) => {
           email: user.email,
           name: user.name,
           phoneNumber: user.phoneNumber,
+          address: user.address,
           qrCodeId: user.qrCodeId,
           qrCodeImage: user.qrCodeImage,
           lastFourDigits: user.lastFourDigits

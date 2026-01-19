@@ -8,7 +8,8 @@ function AdminPanel() {
     email: '',
     password: '',
     name: '',
-    phoneNumber: ''
+    phoneNumber: '',
+    address: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -49,6 +50,7 @@ function AdminPanel() {
         setSuccess({
           email: user.email,
           name: user.name,
+          address: user.address,
           qrCodeId: user.qrCodeId,
           qrCodeImage: user.qrCodeImage,
           lastFourDigits: user.lastFourDigits,
@@ -61,7 +63,8 @@ function AdminPanel() {
           email: '',
           password: '',
           name: '',
-          phoneNumber: ''
+          phoneNumber: '',
+          address: ''
         });
       }
     } catch (err) {
@@ -200,6 +203,28 @@ function AdminPanel() {
                 />
               </div>
 
+              <div className="form-group">
+                <label>Mailing Address *</label>
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                  placeholder="123 Main Street&#10;City, State ZIP&#10;Country"
+                  rows="4"
+                  style={{
+                    width: '100%',
+                    padding: '12px 15px',
+                    border: '2px solid #ddd',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontFamily: 'inherit',
+                    resize: 'vertical',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
               {error && (
                 <div className="error-box">
                   ❌ {error}
@@ -267,11 +292,20 @@ function AdminPanel() {
 
             <div className="next-steps">
               <h3>📋 Next Steps:</h3>
+              <div className="mail-to-box">
+                <h4>📮 Mail Sticker To:</h4>
+                <div className="address-display">
+                  <strong>{success.name}</strong><br/>
+                  {success.address && success.address.split('\n').map((line, i) => (
+                    <span key={i}>{line}<br/></span>
+                  ))}
+                </div>
+              </div>
               <ol>
                 <li>✉️ Email login credentials (email, password, URL) to: {success.email}</li>
                 <li>⬇️ Download QR code sticker using button above</li>
                 <li>🖨️ Print the QR code sticker on adhesive paper</li>
-                <li>📮 Physically mail sticker to customer's address</li>
+                <li>📮 Physically mail sticker to address shown above</li>
                 <li>🏠 Customer receives sticker, applies to door/wall</li>
                 <li>📱 Customer activates at location (first scan only)</li>
               </ol>
