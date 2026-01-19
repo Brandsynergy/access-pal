@@ -57,6 +57,10 @@ function ContactSupport() {
             <div className="feature">📱 No Installation Required</div>
           </div>
         </div>
+        
+        <div className="page-footer">
+          <p>ACCESS PAL - MEDIAD INNOVATION © 2026</p>
+        </div>
       </motion.div>
     </div>
   );

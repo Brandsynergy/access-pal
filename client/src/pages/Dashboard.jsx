@@ -75,7 +75,7 @@ const Dashboard = () => {
 
       <footer className="dashboard-footer">
         <div className="container text-center">
-          <p>© 2026 ACCESS PAL - Smart Video Doorbell</p>
+          <p>ACCESS PAL - MEDIAD INNOVATION © 2026</p>
         </div>
       </footer>
 

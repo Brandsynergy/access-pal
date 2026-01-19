@@ -182,7 +182,7 @@ function VisitorLanding() {
 
         {/* Footer */}
         <div className="landing-footer">
-          <p>Powered by ACCESS PAL</p>
+          <p>ACCESS PAL - MEDIAD INNOVATION © 2026</p>
         </div>
       </div>
     </div>
