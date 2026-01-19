@@ -8,6 +8,9 @@ import rateLimit from 'express-rate-limit';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import qrActivationRoutes from './routes/qrActivationRoutes.js';
+import monitoringRoutes from './routes/monitoringRoutes.js';
+import { requestLoggerMiddleware } from './middleware/requestLogger.js';
+import { logError, logInfo } from './services/errorLogger.js';
 
 // Load environment variables
 dotenv.config();
@@ -32,6 +35,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(requestLoggerMiddleware);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -51,6 +55,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/qr', qrActivationRoutes);
+app.use('/api/monitoring', monitoringRoutes);
 
 // WebRTC signaling via Socket.IO
 io.on('connection', (socket) => {
@@ -161,7 +166,12 @@ io.on('connection', (socket) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logError(err, {
+    method: req.method,
+    path: req.path,
+    ip: req.ip
+  });
+  
   res.status(500).json({ 
     success: false, 
     message: 'Something went wrong!',
@@ -174,4 +184,5 @@ const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
   console.log(`🚀 ACCESS PAL Server running on port ${PORT}`);
   console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logInfo('Server started', { port: PORT, environment: process.env.NODE_ENV || 'development' });
 });

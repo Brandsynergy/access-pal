@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import { logError, logCritical, logInfo } from '../services/errorLogger.js';
 
 // Haversine formula to calculate distance between two coordinates in miles
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -62,6 +63,12 @@ export const activateQR = async (req, res) => {
 
     await user.save();
 
+    logInfo('QR code activated', { 
+      qrCodeId,
+      userId: user.id,
+      location: { latitude, longitude }
+    });
+
     res.json({ 
       success: true, 
       message: 'QR code activated successfully!',
@@ -75,7 +82,7 @@ export const activateQR = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error activating QR code:', error);
+    logCritical(error, { context: 'QR Activation', qrCodeId });
     res.status(500).json({ 
       success: false, 
       message: 'Server error during activation' 
@@ -153,7 +160,7 @@ export const checkActivation = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error checking activation:', error);
+    logError(error, { context: 'Check Activation', qrCodeId });
     res.status(500).json({ 
       success: false, 
       message: 'Server error checking activation' 
