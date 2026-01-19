@@ -87,7 +87,7 @@ function QRActivation() {
       const activationCode = digits.join('');
       const deviceFingerprint = generateDeviceFingerprint();
 
-      const response = await api.post(`/api/qr/activate`, {
+      const response = await api.post(`/qr/activate`, {
         qrCodeId,
         activationCode,
         latitude: location.latitude,

@@ -36,7 +36,7 @@ function VisitorLanding() {
     
     // First check if activated without location (faster)
     try {
-      const response = await api.get(`/api/qr/check/${qrCodeId}`);
+      const response = await api.get(`/qr/check/${qrCodeId}`);
       console.log('✅ Activation check response:', response.data);
 
       if (response.data.success) {
@@ -77,7 +77,7 @@ function VisitorLanding() {
           const { latitude, longitude } = position.coords;
           console.log('📍 Location obtained:', latitude, longitude);
 
-          const response = await api.get(`/api/qr/check/${qrCodeId}?latitude=${latitude}&longitude=${longitude}`);
+          const response = await api.get(`/qr/check/${qrCodeId}?latitude=${latitude}&longitude=${longitude}`);
 
           if (response.data.success && response.data.data.locationValid === false) {
             console.log('❌ Location invalid');

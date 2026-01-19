@@ -51,7 +51,7 @@ const QRCodeDisplay = () => {
   const fetchActivationDetails = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await api.get('/api/qr/details', {
+      const response = await api.get('/qr/details', {
         headers: { Authorization: `Bearer ${token}` }
       });
       
