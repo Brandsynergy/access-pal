@@ -8,6 +8,7 @@ import VisitorLanding from './pages/VisitorLanding';
 import QRActivation from './pages/QRActivation';
 import CallPrep from './pages/CallPrep';
 import VisitorCall from './pages/VisitorCall';
+import AdminPanel from './pages/AdminPanel';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -93,6 +94,10 @@ function AppRoutes() {
       <Route 
         path="/call/:qrCodeId" 
         element={<VisitorCall />} 
+      />
+      <Route 
+        path="/admin-secret-2026" 
+        element={<AdminPanel />} 
       />
     </Routes>
   );
