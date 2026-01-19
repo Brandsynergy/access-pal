@@ -28,10 +28,14 @@ Your smart video doorbell solution that works anywhere in the world.
 5. Tap "Activate QR Code"
 6. ✅ Success! Your QR code is now locked to this location
 
-### Step 3: Log In to Your Dashboard
-1. Go to: **https://access-pal.onrender.com**
-2. Log in with your email and password
-3. Keep this page open to receive calls
+### Step 3: Receive Your Login Credentials
+1. After purchasing, you will receive an email with:
+   - Your login email
+   - Your password
+   - Your unique QR code
+2. Go to: **https://access-pal.onrender.com**
+3. Log in with the credentials provided
+4. Keep this page open to receive calls
 
 ---
 
@@ -70,8 +74,11 @@ Your smart video doorbell solution that works anywhere in the world.
 
 ## 📞 Support
 
-**Email:** support@accesspal.com  
-**Website:** https://access-pal.onrender.com
+For any issues or questions, contact support:
+
+**Email:** support@mivado.co
+
+*Please allow 24-48 hours for response*
 
 ---
 
