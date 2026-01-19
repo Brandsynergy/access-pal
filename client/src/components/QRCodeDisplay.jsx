@@ -206,10 +206,10 @@ const QRCodeDisplay = () => {
           <h3>How to Use:</h3>
           <ol>
             <li>Print this QR code and stick it on your door</li>
-            <li><strong>Important:</strong> Print the activation code <span style={{ background: 'white', color: '#667eea', padding: '2px 8px', borderRadius: '4px', fontWeight: '800' }}>{activationDetails?.lastFourDigits || 'XXXX'}</span> on the back</li>
-            <li>First scan: Visitor enters the 4-digit code to activate</li>
+            <li><strong>Important:</strong> Write the activation code <span style={{ background: 'white', color: '#667eea', padding: '2px 8px', borderRadius: '4px', fontWeight: '800' }}>{activationDetails?.lastFourDigits || 'XXXX'}</span> on the back of the sticker</li>
+            <li><strong>First time:</strong> Scan your own QR code and enter the 4-digit code to activate it at your door location</li>
             <li>QR code locks to that location (≈ 1 mile radius)</li>
-            <li>Subsequent scans: Video call works automatically!</li>
+            <li><strong>After activation:</strong> Visitors scan and video call works automatically!</li>
           </ol>
         </div>
         
