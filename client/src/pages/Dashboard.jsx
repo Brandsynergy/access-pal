@@ -13,8 +13,21 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isConnected, setIsConnected] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState(
+    'Notification' in window ? Notification.permission : 'unsupported'
+  );
 
   useEffect(() => {
+    // Request notification permission immediately
+    if ('Notification' in window && Notification.permission === 'default') {
+      setTimeout(() => {
+        Notification.requestPermission().then(permission => {
+          console.log('Notification permission:', permission);
+          setNotificationPermission(permission);
+        });
+      }, 1000);
+    }
+
     // Monitor socket connection status
     if (webrtcService.socket) {
       setIsConnected(webrtcService.socket.connected);
@@ -34,6 +47,20 @@ const Dashboard = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const requestNotifications = () => {
+    if ('Notification' in window) {
+      Notification.requestPermission().then(permission => {
+        setNotificationPermission(permission);
+        if (permission === 'granted') {
+          new Notification('✅ Notifications Enabled!', {
+            body: 'You will now be alerted when visitors scan your QR code',
+            icon: '/icon-192.png'
+          });
+        }
+      });
+    }
   };
 
   return (
@@ -70,6 +97,39 @@ const Dashboard = () => {
       </header>
 
       <main>
+        {notificationPermission !== 'granted' && notificationPermission !== 'unsupported' && (
+          <div style={{
+            background: '#fff3cd',
+            border: '2px solid #ffc107',
+            borderRadius: '12px',
+            padding: '20px',
+            margin: '20px auto',
+            maxWidth: '600px',
+            textAlign: 'center'
+          }}>
+            <h3 style={{ color: '#856404', margin: '0 0 10px 0' }}>
+              🔔 Enable Notifications
+            </h3>
+            <p style={{ color: '#856404', margin: '0 0 15px 0' }}>
+              Get instant alerts when visitors scan your QR code!
+            </p>
+            <button 
+              onClick={requestNotifications}
+              style={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '12px 30px',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              🔔 Enable Notifications Now
+            </button>
+          </div>
+        )}
         <QRCodeDisplay />
       </main>
 
