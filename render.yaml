@@ -9,13 +9,21 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: CLIENT_URL
+        value: https://access-pal-1.onrender.com
+      - key: CORS_ORIGIN
+        value: https://access-pal-1.onrender.com
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 5000
 
   - type: web
     name: access-pal-frontend
     env: static
     region: oregon
     plan: free
-    buildCommand: cd client && npm install && npm run build
+    buildCommand: cd client && npm install && VITE_API_URL=https://access-pal.onrender.com/api npm run build
     staticPublishPath: client/dist
     routes:
       - type: rewrite
