@@ -89,10 +89,6 @@ const QRCodeDisplay = () => {
           {!loadingActivation && activationDetails && (
             <>
               <div className="info-item">
-                <span className="info-label">Activation Code:</span>
-                <span className="info-value activation-code">{activationDetails.lastFourDigits}</span>
-              </div>
-              <div className="info-item">
                 <span className="info-label">Status:</span>
                 <span className={`info-value status-badge ${activationDetails.isActivated ? 'activated' : 'not-activated'}`}>
                   {activationDetails.isActivated ? '✅ Activated' : '⚠️ Not Activated'}
@@ -137,7 +133,7 @@ const QRCodeDisplay = () => {
         <div className="qr-instructions">
           <h3>How to Use:</h3>
           <ol>
-            <li>Your QR code sticker will arrive with the activation code <span style={{ background: 'white', color: '#667eea', padding: '2px 8px', borderRadius: '4px', fontWeight: '800' }}>{activationDetails?.lastFourDigits || 'XXXX'}</span> printed on the back</li>
+            <li>Your QR code sticker will arrive with a 4-digit activation code printed on the back</li>
             <li>Stick the QR code on your door or wall at the entrance</li>
             <li><strong>First time:</strong> Scan your own QR code and enter the 4-digit code from the back to activate it</li>
             <li>QR code locks to that location (≈ 1 mile radius)</li>
