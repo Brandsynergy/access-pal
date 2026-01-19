@@ -87,13 +87,29 @@ function AdminUserManagement() {
     }
   };
 
-  const downloadQRCode = (qrCodeImage, qrCodeId) => {
-    const link = document.createElement('a');
-    link.href = qrCodeImage;
-    link.download = `ACCESS-PAL-${qrCodeId}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const downloadQRCode = async (qrCodeImage, qrCodeId) => {
+    try {
+      // Convert data URL to blob
+      const response = await fetch(qrCodeImage);
+      const blob = await response.blob();
+      
+      // Create object URL from blob
+      const url = URL.createObjectURL(blob);
+      
+      // Create and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ACCESS-PAL-${qrCodeId}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Failed to download QR code. Please try regenerating.');
+      console.error('Download error:', err);
+    }
   };
 
   if (!isAuthenticated) {
