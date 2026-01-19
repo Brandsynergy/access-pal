@@ -32,6 +32,12 @@ function VisitorCall() {
     };
 
     webrtcService.onCallEnded = () => {
+      console.log('📞 Call ended, cleaning up streams');
+      // Clear remote stream immediately
+      setRemoteStream(null);
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = null;
+      }
       setCallState('ended');
     };
 
@@ -149,6 +155,15 @@ function VisitorCall() {
   };
 
   const handleEndCall = () => {
+    console.log('📞 Visitor ending call');
+    // Clear streams immediately
+    setRemoteStream(null);
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
     webrtcService.endCall();
     setCallState('ended');
   };
@@ -255,7 +270,7 @@ function VisitorCall() {
           <div className="call-status">
             <h2>📞 Call Ended</h2>
             <p>Thank you for using ACCESS PAL</p>
-            <button onClick={() => window.close()} className="close-btn">
+            <button onClick={() => window.location.href = `/visitor/${qrCodeId}`} className="close-btn">
               Close Window
             </button>
           </div>
