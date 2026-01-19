@@ -6,6 +6,7 @@ import webrtcService from '../services/webrtc';
 import QRCodeDisplay from '../components/QRCodeDisplay';
 import IncomingCall from '../components/IncomingCall';
 import VideoCall from '../components/VideoCall';
+import PWAInstallBanner from '../components/PWAInstallBanner';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -37,6 +38,8 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
+      {/* PWA Install Banner */}
+      <PWAInstallBanner />
       <header className="dashboard-header">
         <div className="container">
           <div className="header-content">
