@@ -36,8 +36,8 @@ export const activateQR = async (req, res) => {
       });
     }
 
-    // Verify activation code (last 4 digits)
-    if (user.lastFourDigits !== activationCode.toUpperCase()) {
+    // Verify activation code (last 4 digits) - case insensitive
+    if (user.lastFourDigits.toUpperCase() !== activationCode.toUpperCase()) {
       return res.status(400).json({ 
         success: false, 
         message: 'Invalid activation code. Please check the last 4 digits on the back of your QR code sticker.' 
