@@ -33,7 +33,7 @@ Your smart video doorbell solution that works anywhere in the world.
    - Your login email
    - Your password
    - Your unique QR code
-2. Go to: **https://access-pal.onrender.com**
+2. Go to: **https://access-pal-1.onrender.com**
 3. Log in with the credentials provided
 4. Keep this page open to receive calls
 
