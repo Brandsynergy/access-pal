@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CallProvider } from './context/CallContext';
-import Register from './pages/Register';
+import ContactSupport from './pages/ContactSupport';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import VisitorLanding from './pages/VisitorLanding';
@@ -54,15 +54,11 @@ function AppRoutes() {
     <Routes>
       <Route 
         path="/" 
-        element={<Navigate to="/register" />} 
+        element={<Navigate to="/login" />} 
       />
       <Route 
         path="/register" 
-        element={
-          <PublicRoute>
-            <Register />
-          </PublicRoute>
-        } 
+        element={<ContactSupport />} 
       />
       <Route 
         path="/login" 
