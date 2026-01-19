@@ -189,6 +189,90 @@ export const generateSticker = async (req, res) => {
 };
 
 /**
+ * Admin: Get user by email
+ */
+export const getUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const user = await User.findOne({ 
+      where: { email },
+      attributes: { exclude: ['password'] }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { user }
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get user',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Admin: Regenerate QR code for any user
+ */
+export const adminRegenerateQR = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Generate new QR code
+    const { qrCodeId, qrCodeImage, lastFourDigits } = await generateUserQRCode(user.id);
+
+    // Update user - reset activation
+    user.qrCodeId = qrCodeId;
+    user.qrCodeImage = qrCodeImage;
+    user.lastFourDigits = lastFourDigits;
+    user.isQrActivated = false;
+    user.activationDeviceFingerprint = null;
+    user.activationLatitude = null;
+    user.activationLongitude = null;
+    user.activatedAt = null;
+    user.scanCount = 0;
+    user.lastScannedAt = null;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'QR code regenerated successfully',
+      data: {
+        qrCodeId: user.qrCodeId,
+        qrCodeImage: user.qrCodeImage,
+        lastFourDigits: user.lastFourDigits
+      }
+    });
+  } catch (error) {
+    console.error('Admin regenerate QR error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to regenerate QR code',
+      error: error.message
+    });
+  }
+};
+
+/**
  * Regenerate QR code for user
  */
 export const regenerateQRCode = async (req, res) => {

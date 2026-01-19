@@ -9,6 +9,7 @@ import QRActivation from './pages/QRActivation';
 import CallPrep from './pages/CallPrep';
 import VisitorCall from './pages/VisitorCall';
 import AdminPanel from './pages/AdminPanel';
+import AdminUserManagement from './pages/AdminUserManagement';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -98,6 +99,10 @@ function AppRoutes() {
       <Route 
         path="/admin-secret-2026" 
         element={<AdminPanel />} 
+      />
+      <Route 
+        path="/admin-users-2026" 
+        element={<AdminUserManagement />} 
       />
     </Routes>
   );
