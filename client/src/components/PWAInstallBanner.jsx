@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePWA } from '../hooks/usePWA';
 import './PWAInstallBanner.css';
@@ -7,6 +7,17 @@ const PWAInstallBanner = () => {
   const { isInstallable, isInstalled, installApp, requestNotificationPermission, notificationPermission } = usePWA();
   const [dismissed, setDismissed] = useState(false);
   const [notifDismissed, setNotifDismissed] = useState(localStorage.getItem('notif-dismissed') === 'true');
+
+  // Auto-request notification permission on mount if not yet asked
+  useEffect(() => {
+    if (notificationPermission === 'default' && !notifDismissed) {
+      // Wait a bit before asking so user sees dashboard first
+      const timer = setTimeout(() => {
+        requestNotificationPermission();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleInstall = async () => {
     const installed = await installApp();
