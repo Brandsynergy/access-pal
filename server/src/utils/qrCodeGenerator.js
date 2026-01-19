@@ -38,26 +38,22 @@ export const generateUserQRCode = async (userId) => {
     // Load QR code into canvas
     const qrImage = await loadImage(qrBuffer);
     
-    // Create canvas with extra space for text
-    const canvas = createCanvas(450, 500);
+    // Create canvas with space for branding only (NO activation code)
+    const canvas = createCanvas(450, 470);
     const ctx = canvas.getContext('2d');
     
     // Fill white background
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, 450, 500);
+    ctx.fillRect(0, 0, 450, 470);
     
     // Draw QR code centered
     ctx.drawImage(qrImage, 25, 25, 400, 400);
     
-    // Add text at bottom
+    // Add branding text at bottom (NO activation code for security)
     ctx.fillStyle = '#000000';
     ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('ACCESS PAL', 225, 450);
-    
-    ctx.font = 'bold 20px monospace';
-    ctx.fillStyle = '#667eea';
-    ctx.fillText(`Code: ${lastFourDigits}`, 225, 480);
+    ctx.fillText('ACCESS PAL', 225, 455);
     
     // Convert canvas to base64
     const qrCodeImage = canvas.toDataURL('image/png');
@@ -71,6 +67,79 @@ export const generateUserQRCode = async (userId) => {
   } catch (error) {
     console.error('QR Code generation error:', error);
     throw new Error('Failed to generate QR code');
+  }
+};
+
+/**
+ * Generate printable sticker with activation code on back/separate section
+ * @param {string} qrCodeImage - Base64 QR code image (front)
+ * @param {string} lastFourDigits - Activation code
+ * @param {string} qrCodeId - QR code ID
+ * @returns {Promise<string>} Base64 image of printable sticker sheet
+ */
+export const generatePrintableSticker = async (qrCodeImage, lastFourDigits, qrCodeId) => {
+  try {
+    // Create canvas for printable sheet (front and back side by side)
+    const canvas = createCanvas(900, 470);
+    const ctx = canvas.getContext('2d');
+    
+    // Fill white background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, 900, 470);
+    
+    // Draw dividing line
+    ctx.strokeStyle = '#CCCCCC';
+    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(450, 0);
+    ctx.lineTo(450, 470);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // LEFT SIDE: Front of sticker (QR code)
+    const qrImg = await loadImage(qrCodeImage);
+    ctx.drawImage(qrImg, 0, 0, 450, 470);
+    
+    // RIGHT SIDE: Back of sticker (Activation code)
+    ctx.fillStyle = '#F8F9FA';
+    ctx.fillRect(450, 0, 450, 470);
+    
+    // Add instructions
+    ctx.fillStyle = '#666666';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('BACK OF STICKER', 675, 80);
+    ctx.fillText('(Fold here or print on reverse)', 675, 105);
+    
+    // Draw box around activation code
+    ctx.strokeStyle = '#667eea';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(520, 150, 310, 180);
+    
+    // Add activation code
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 20px Arial';
+    ctx.fillText('ACTIVATION CODE', 675, 190);
+    
+    ctx.font = 'bold 60px monospace';
+    ctx.fillStyle = '#667eea';
+    ctx.fillText(lastFourDigits.toUpperCase(), 675, 260);
+    
+    ctx.font = '14px Arial';
+    ctx.fillStyle = '#666666';
+    ctx.fillText('Enter this code when first scanning', 675, 300);
+    
+    // Add QR ID reference at bottom
+    ctx.font = '12px monospace';
+    ctx.fillStyle = '#999999';
+    ctx.fillText(`ID: ${qrCodeId}`, 675, 420);
+    
+    // Convert to base64
+    return canvas.toDataURL('image/png');
+  } catch (error) {
+    console.error('Printable sticker generation error:', error);
+    throw new Error('Failed to generate printable sticker');
   }
 };
 

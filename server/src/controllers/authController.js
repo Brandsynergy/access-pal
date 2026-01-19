@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { generateUserQRCode } from '../utils/qrCodeGenerator.js';
+import { generateUserQRCode, generatePrintableSticker } from '../utils/qrCodeGenerator.js';
 
 /**
  * Register a new user and generate their QR code
@@ -49,7 +49,8 @@ export const register = async (req, res) => {
           name: user.name,
           phoneNumber: user.phoneNumber,
           qrCodeId: user.qrCodeId,
-          qrCodeImage: user.qrCodeImage
+          qrCodeImage: user.qrCodeImage,
+          lastFourDigits: user.lastFourDigits
         },
         token
       }
@@ -147,6 +148,40 @@ export const getProfile = async (req, res) => {
       success: false, 
       message: 'Failed to get profile', 
       error: error.message 
+    });
+  }
+};
+
+/**
+ * Generate printable sticker with activation code on back
+ */
+export const generateSticker = async (req, res) => {
+  try {
+    const { qrCodeImage, lastFourDigits, qrCodeId } = req.body;
+
+    if (!qrCodeImage || !lastFourDigits || !qrCodeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields'
+      });
+    }
+
+    // Generate printable sticker
+    const printableSticker = await generatePrintableSticker(qrCodeImage, lastFourDigits, qrCodeId);
+
+    res.json({
+      success: true,
+      message: 'Printable sticker generated',
+      data: {
+        printableSticker
+      }
+    });
+  } catch (error) {
+    console.error('Generate sticker error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate printable sticker',
+      error: error.message
     });
   }
 };

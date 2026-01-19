@@ -51,6 +51,7 @@ function AdminPanel() {
           name: user.name,
           qrCodeId: user.qrCodeId,
           qrCodeImage: user.qrCodeImage,
+          lastFourDigits: user.lastFourDigits,
           password: formData.password,
           loginUrl: window.location.origin + '/login'
         });
@@ -75,14 +76,27 @@ function AdminPanel() {
     alert('Copied to clipboard!');
   };
 
-  const downloadQRCode = () => {
-    // Create a temporary link element
-    const link = document.createElement('a');
-    link.href = success.qrCodeImage;
-    link.download = `ACCESS-PAL-${success.qrCodeId}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const downloadQRCode = async () => {
+    try {
+      // Request printable sticker from backend
+      const response = await api.post('/auth/generate-sticker', {
+        qrCodeImage: success.qrCodeImage,
+        lastFourDigits: success.lastFourDigits,
+        qrCodeId: success.qrCodeId
+      });
+      
+      if (response.data.success) {
+        // Download the printable sticker
+        const link = document.createElement('a');
+        link.href = response.data.data.printableSticker;
+        link.download = `ACCESS-PAL-STICKER-${success.qrCodeId}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      alert('Failed to generate printable sticker: ' + (error.response?.data?.message || error.message));
+    }
   };
 
   if (!isAuthenticated) {
