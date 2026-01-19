@@ -6,24 +6,9 @@ import './QRCodeDisplay.css';
 
 const QRCodeDisplay = () => {
   const { user, regenerateQRCode } = useAuth();
-  const [downloading, setDownloading] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [activationDetails, setActivationDetails] = useState(null);
   const [loadingActivation, setLoadingActivation] = useState(true);
-
-  const handleDownload = () => {
-    setDownloading(true);
-    
-    // Create download link
-    const link = document.createElement('a');
-    link.href = user.qrCodeImage;
-    link.download = `ACCESS-PAL-${user.name.replace(/\s+/g, '-')}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    setTimeout(() => setDownloading(false), 1000);
-  };
 
   const handleRegenerate = async () => {
     if (!window.confirm('Are you sure? Your old QR code will no longer work and will need to be reactivated.')) {
@@ -65,49 +50,6 @@ const QRCodeDisplay = () => {
     }
   };
 
-  const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>ACCESS PAL QR Code - ${user.name}</title>
-          <style>
-            body {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              min-height: 100vh;
-              font-family: Arial, sans-serif;
-              padding: 40px;
-            }
-            h1 {
-              margin-bottom: 20px;
-              color: #2563eb;
-            }
-            img {
-              max-width: 400px;
-              border: 2px solid #e5e7eb;
-              border-radius: 12px;
-              padding: 20px;
-            }
-            p {
-              margin-top: 20px;
-              color: #6b7280;
-            }
-          </style>
-        </head>
-        <body>
-          <h1>ACCESS PAL - ${user.name}</h1>
-          <img src="${user.qrCodeImage}" alt="QR Code" />
-          <p>Scan this code to connect with me at my door</p>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-  };
 
   return (
     <motion.div 
@@ -174,24 +116,14 @@ const QRCodeDisplay = () => {
           )}
         </div>
 
+        <div className="security-notice">
+          <h3>🔒 Security Notice</h3>
+          <p>For your security, QR codes cannot be downloaded or printed from this dashboard.</p>
+          <p>Your physical QR code sticker was mailed to you during account setup.</p>
+          <p>If you need a replacement sticker, contact support at <strong>support@mivado.co</strong></p>
+        </div>
+
         <div className="qr-actions">
-          <motion.button
-            className="btn btn-primary"
-            onClick={handleDownload}
-            disabled={downloading}
-            whileTap={{ scale: 0.95 }}
-          >
-            {downloading ? '⬇️ Downloading...' : '📥 Download QR Code'}
-          </motion.button>
-
-          <motion.button
-            className="btn btn-outline"
-            onClick={handlePrint}
-            whileTap={{ scale: 0.95 }}
-          >
-            🖨️ Print QR Code
-          </motion.button>
-
           <motion.button
             className="btn btn-secondary"
             onClick={handleRegenerate}

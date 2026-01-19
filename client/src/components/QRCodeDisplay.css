@@ -122,11 +122,38 @@
   border: 2px solid #ffc107;
 }
 
+.security-notice {
+  background: #d4edda;
+  border: 3px solid #28a745;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.security-notice h3 {
+  color: #155724;
+  margin-bottom: 12px;
+  font-size: 20px;
+}
+
+.security-notice p {
+  color: #155724;
+  margin: 8px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.security-notice strong {
+  color: #0c4128;
+  font-weight: 700;
+}
+
 .qr-actions {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin: 30px 0;
+  margin: 20px 0;
 }
 
 .qr-actions button {

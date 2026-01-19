@@ -272,12 +272,45 @@
   display: block;
   border: 3px solid #eee;
   border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.download-qr-btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 15px;
+}
+
+.download-qr-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+}
+
+.qr-warning {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 6px;
+  padding: 12px;
+  color: #856404;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
 .qr-note {
   color: #999;
   font-size: 14px;
-  margin-top: 10px;
+  margin-top: 5px;
+  text-align: center;
   font-style: italic;
 }
 
@@ -303,6 +336,17 @@
 .next-steps li {
   margin-bottom: 8px;
   font-size: 16px;
+}
+
+.security-note {
+  background: #d4edda;
+  border: 2px solid #28a745;
+  border-radius: 6px;
+  padding: 15px;
+  color: #155724;
+  font-size: 14px;
+  margin-top: 15px;
+  text-align: center;
 }
 
 @media (max-width: 768px) {

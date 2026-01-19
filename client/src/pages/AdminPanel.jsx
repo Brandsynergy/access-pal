@@ -75,6 +75,16 @@ function AdminPanel() {
     alert('Copied to clipboard!');
   };
 
+  const downloadQRCode = () => {
+    // Create a temporary link element
+    const link = document.createElement('a');
+    link.href = success.qrCodeImage;
+    link.download = `ACCESS-PAL-${success.qrCodeId}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="admin-panel-page">
@@ -201,7 +211,7 @@ function AdminPanel() {
             <h2>User Created Successfully!</h2>
             
             <div className="credentials-box">
-              <h3>📧 Email to Customer:</h3>
+              <h3>📧 Login Credentials to Email:</h3>
               
               <div className="credential-item">
                 <label>Email:</label>
@@ -226,30 +236,32 @@ function AdminPanel() {
                   <button onClick={() => copyToClipboard(success.loginUrl)}>📋</button>
                 </div>
               </div>
-
-              <div className="credential-item">
-                <label>QR Code ID:</label>
-                <div className="credential-value">
-                  {success.qrCodeId}
-                  <button onClick={() => copyToClipboard(success.qrCodeId)}>📋</button>
-                </div>
-              </div>
             </div>
 
             <div className="qr-preview">
-              <h3>Generated QR Code:</h3>
+              <h3>📦 QR Code Sticker - Physical Mail Only:</h3>
               <img src={success.qrCodeImage} alt="QR Code" />
-              <p className="qr-note">Customer can download this from their dashboard</p>
+              <button 
+                onClick={downloadQRCode}
+                className="download-qr-btn"
+              >
+                ⬇️ Download QR Code Sticker
+              </button>
+              <p className="qr-warning">⚠️ Print and mail this physical sticker to customer</p>
+              <p className="qr-note">QR Code ID: {success.qrCodeId}</p>
             </div>
 
             <div className="next-steps">
               <h3>📋 Next Steps:</h3>
               <ol>
-                <li>Copy credentials above</li>
-                <li>Email them to: {success.email}</li>
-                <li>Customer logs in and downloads QR code</li>
-                <li>Customer activates at their door</li>
+                <li>✉️ Email login credentials (email, password, URL) to: {success.email}</li>
+                <li>⬇️ Download QR code sticker using button above</li>
+                <li>🖨️ Print the QR code sticker on adhesive paper</li>
+                <li>📮 Physically mail sticker to customer's address</li>
+                <li>🏠 Customer receives sticker, applies to door/wall</li>
+                <li>📱 Customer activates at location (first scan only)</li>
               </ol>
+              <p className="security-note">🔒 <strong>Security:</strong> Never send QR code image digitally. Physical mail only prevents unauthorized copies.</p>
             </div>
 
             <button 
