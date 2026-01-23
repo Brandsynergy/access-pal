@@ -8,11 +8,15 @@ function IncomingCall() {
   const audioRef = useRef(null);
 
   useEffect(() => {
+    console.log('🔔 IncomingCall useEffect:', { incomingCall: !!incomingCall, callState, notificationShown: notificationShown.current });
+    
     if (incomingCall && callState === 'ringing' && !notificationShown.current) {
+      console.log('🚨 SHOWING INCOMING CALL UI!');
       notificationShown.current = true;
       
       // Show browser notification
       if ('Notification' in window && Notification.permission === 'granted') {
+        console.log('📱 Showing browser notification');
         const notification = new Notification('🔔 Visitor at Your Door!', {
           body: 'Someone has scanned your QR code and wants to talk',
           icon: '/icon-192.png',
@@ -26,10 +30,13 @@ function IncomingCall() {
           window.focus();
           notification.close();
         };
+      } else {
+        console.warn('⚠️ Browser notification NOT shown. Permission:', Notification.permission);
       }
 
       // Play doorbell sound
       if (audioRef.current) {
+        console.log('🔊 Playing doorbell sound');
         audioRef.current.play().catch(err => console.log('Audio play failed:', err));
       }
     }

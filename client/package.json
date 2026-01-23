@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp public/_redirects dist/_redirects",
+    "build": "vite build && cp public/_redirects dist/_redirects && cp public/_headers dist/_headers",
     "preview": "vite preview"
   },
   "dependencies": {
