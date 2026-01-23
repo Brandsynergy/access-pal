@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CallProvider } from './context/CallContext';
@@ -109,6 +110,32 @@ function AppRoutes() {
 }
 
 function App() {
+  useEffect(() => {
+    // Force service worker update on load
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(registration => {
+          console.log('🔄 Updating service worker...');
+          registration.update();
+          
+          // Listen for new service worker
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'activated') {
+                  console.log('✅ New service worker activated!');
+                  // Reload page to use new service worker
+                  window.location.reload();
+                }
+              });
+            }
+          });
+        });
+      });
+    }
+  }, []);
+  
   return (
     <BrowserRouter>
       <AuthProvider>

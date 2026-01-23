@@ -1,16 +1,16 @@
 // Service Worker for ACCESS PAL PWA
-const CACHE_NAME = 'access-pal-v1';
+const CACHE_NAME = 'access-pal-v2';
 const urlsToCache = [
-  '/',
-  '/login',
-  '/dashboard',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png'
 ];
 
-// Install service worker and cache resources
+// Install service worker and cache static assets only
 self.addEventListener('install', (event) => {
+  // Skip waiting to activate immediately
+  self.skipWaiting();
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -20,22 +20,29 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Fetch from cache or network
+// NETWORK FIRST strategy - always try network, fallback to cache
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response;
+        // Clone response to cache for offline use
+        if (response.status === 200) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME)
+            .then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
         }
-        return fetch(event.request);
-      }
-    )
+        return response;
+      })
+      .catch(() => {
+        // Network failed, try cache
+        return caches.match(event.request);
+      })
   );
 });
 
-// Update service worker
+// Update service worker and take control immediately
 self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -43,10 +50,14 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
+    }).then(() => {
+      // Take control of all pages immediately
+      return self.clients.claim();
     })
   );
 });
