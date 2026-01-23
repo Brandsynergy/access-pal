@@ -69,15 +69,18 @@ export const CallProvider = ({ children }) => {
         try {
           const user = JSON.parse(userStr);
           if (user.qrCodeId) {
-            console.log('🏠 Homeowner joining room:', user.qrCodeId);
+            console.log('\n🏠 HOMEOWNER JOINING ROOM:', user.qrCodeId);
+            console.log('🆔 Socket ID:', webrtcService.socket.id);
+            console.log('⏰ Join time:', new Date().toISOString());
             webrtcService.socket.emit('join-room', user.qrCodeId);
             
             // Confirm we're in the room
             setTimeout(() => {
-              console.log('✅ Homeowner ready to receive calls in room:', user.qrCodeId);
+              console.log('\n✅ Homeowner ready to receive calls in room:', user.qrCodeId);
+              console.log('🔍 Test: Emitting test-visitor-alert to verify room connection\n');
             }, 500);
           } else {
-            console.error('❌ No qrCodeId found for user');
+            console.error('\n❌ No qrCodeId found for user\n');
           }
         } catch (error) {
           console.error('❌ Error parsing user data:', error);
@@ -89,7 +92,8 @@ export const CallProvider = ({ children }) => {
 
     // Join room when socket connects
     webrtcService.socket.on('connect', () => {
-      console.log('✅ Socket connected:', webrtcService.socket.id);
+      console.log('\n✅ Socket connected:', webrtcService.socket.id);
+      console.log('⏰ Connection time:', new Date().toISOString());
       joinHomeownerRoom();
     });
 
@@ -106,10 +110,14 @@ export const CallProvider = ({ children }) => {
     }
 
     // Listen for incoming visitor alerts
+    console.log('🎯 CallContext: Setting up visitor-at-door listener');
     webrtcService.socket.on('visitor-at-door', (data) => {
-      console.log('🔔🔔🔔 VISITOR AT DOOR RECEIVED!', data);
-      console.log('Current socket ID:', webrtcService.socket.id);
-      console.log('Current rooms:', webrtcService.socket.rooms);
+      console.log('\n\n🔔🔔🔔 VISITOR AT DOOR RECEIVED IN CALLCONTEXT!');
+      console.log('📍 Data:', JSON.stringify(data));
+      console.log('🆔 Current socket ID:', webrtcService.socket.id);
+      console.log('⏰ Current time:', new Date().toISOString());
+      console.log('📱 Notification permission:', Notification.permission);
+      console.log('\n');
       
       setIncomingCall(data);
       setCallState('ringing');

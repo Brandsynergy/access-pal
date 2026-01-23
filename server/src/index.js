@@ -64,13 +64,19 @@ io.on('connection', (socket) => {
   // Join room based on QR code ID
   socket.on('join-room', (qrCodeId) => {
     socket.join(qrCodeId);
-    console.log(`\n🏠 Socket ${socket.id} joined room: ${qrCodeId}`);
+    console.log(`\n\n==============================================`);
+    console.log(`🏠 JOIN-ROOM EVENT RECEIVED`);
+    console.log(`==============================================`);
+    console.log(`🆔 Socket ID: ${socket.id}`);
+    console.log(`🏠 Room (QR Code ID): ${qrCodeId}`);
+    console.log(`⏰ Time: ${new Date().toISOString()}`);
     
     // Get all sockets in this room
     const room = io.sockets.adapter.rooms.get(qrCodeId);
     const socketsInRoom = room ? Array.from(room) : [];
-    console.log(`👥 Total sockets in room ${qrCodeId}:`, socketsInRoom.length);
-    console.log('📝 Socket IDs in room:', socketsInRoom);
+    console.log(`👥 Total sockets in room ${qrCodeId}: ${socketsInRoom.length}`);
+    console.log('📋 Socket IDs in room:', socketsInRoom);
+    console.log(`==============================================\n`);
     
     // Notify room members
     socket.to(qrCodeId).emit('user-joined', {
@@ -108,28 +114,50 @@ io.on('connection', (socket) => {
 
   // Visitor notification - CRITICAL!
   socket.on('visitor-alert', (data) => {
-    console.log(`\n\n🔔🔔🔔 VISITOR ALERT RECEIVED!`);
-    console.log(`📍 QR Code ID: ${data.qrCodeId}`);
+    console.log(`\n\n==============================================`);
+    console.log(`🔔🔔🔔 VISITOR-ALERT EVENT RECEIVED ON SERVER!`);
+    console.log(`==============================================`);
+    console.log(`🆔 Sender Socket ID: ${socket.id}`);
+    console.log(`🏠 Target Room (QR Code ID): ${data.qrCodeId}`);
     console.log(`⏰ Timestamp: ${data.timestamp}`);
+    console.log(`📊 Data:`, JSON.stringify(data));
     
     // Check room status
     const room = io.sockets.adapter.rooms.get(data.qrCodeId);
     if (room) {
       const socketsInRoom = Array.from(room);
-      console.log(`✅ Room EXISTS with ${socketsInRoom.length} socket(s)`);
-      console.log(`📝 Socket IDs:`, socketsInRoom);
+      console.log(`\n✅ Room "${data.qrCodeId}" EXISTS!`);
+      console.log(`👥 Number of sockets in room: ${socketsInRoom.length}`);
+      console.log(`📋 Socket IDs in room:`, socketsInRoom);
+      console.log(`👉 Sender (${socket.id}) is ${socketsInRoom.includes(socket.id) ? 'IN' : 'NOT IN'} the room`);
+      
+      // List all sockets and their rooms
+      console.log('\n🗂️ All rooms on server:');
+      io.sockets.adapter.rooms.forEach((sockets, roomName) => {
+        console.log(`  - Room "${roomName}": ${Array.from(sockets).join(', ')}`);
+      });
       
       // Emit to entire room including sender
+      console.log(`\n📡 Emitting 'visitor-at-door' event to room "${data.qrCodeId}"...`);
       io.to(data.qrCodeId).emit('visitor-at-door', data);
-      console.log(`✅ Emitted 'visitor-at-door' event to room`);
+      console.log(`✅ Successfully emitted 'visitor-at-door' event`);
     } else {
-      console.log(`❌ WARNING: Room ${data.qrCodeId} does NOT exist!`);
-      console.log(`❌ No homeowner connected to receive this call`);
+      console.log(`\n❌❌❌ WARNING: Room "${data.qrCodeId}" does NOT exist!`);
+      console.log(`❌ No homeowner socket has joined this room`);
+      console.log(`\n🗂️ Current rooms on server:`);
+      if (io.sockets.adapter.rooms.size === 0) {
+        console.log('  (no rooms exist)');
+      } else {
+        io.sockets.adapter.rooms.forEach((sockets, roomName) => {
+          console.log(`  - Room "${roomName}": ${Array.from(sockets).join(', ')}`);
+        });
+      }
       
       // Still try to emit in case room tracking is off
+      console.log(`\n📡 Still attempting to emit (in case room tracking is delayed)...`);
       io.to(data.qrCodeId).emit('visitor-at-door', data);
     }
-    console.log(`\n`);
+    console.log(`==============================================\n\n`);
   });
 
   // Call lifecycle events

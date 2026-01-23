@@ -237,6 +237,8 @@ class WebRTCService {
       });
 
       // Join room
+      console.log('\n🚪 VISITOR: Joining room:', qrCodeId);
+      console.log('🆔 Visitor socket ID:', this.socket.id);
       this.socket.emit('join-room', qrCodeId);
 
       // Set up listeners FIRST before sending anything
@@ -301,11 +303,16 @@ class WebRTCService {
 
       // Wait a moment to ensure offer is sent, then alert homeowner
       setTimeout(() => {
-        console.log('🔔 VISITOR: Sending visitor alert to homeowner...');
+        console.log('\n\n🔔🔔🔔 VISITOR: Sending visitor-alert to homeowner!');
+        console.log('🆔 Visitor socket ID:', this.socket.id);
+        console.log('🏠 Room (qrCodeId):', qrCodeId);
+        console.log('⏰ Timestamp:', new Date().toISOString());
+        console.log('📡 Emitting visitor-alert event...\n');
         this.socket.emit('visitor-alert', { 
           qrCodeId,
           timestamp: new Date().toISOString()
         });
+        console.log('✅ visitor-alert emitted successfully\n');
       }, 500); // Short delay to ensure offer is sent first
 
     } catch (error) {
