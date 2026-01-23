@@ -63,6 +63,10 @@ const Dashboard = () => {
     }
   };
 
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="dashboard-container">
       {/* PWA Install Banner */}
