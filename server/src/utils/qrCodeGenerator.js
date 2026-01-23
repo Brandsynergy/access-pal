@@ -49,6 +49,36 @@ export const generateUserQRCode = async (userId) => {
     // Draw QR code centered
     ctx.drawImage(qrImage, 25, 25, 400, 400);
     
+    // Add logo in center of QR code (with white background)
+    const logoSize = 80;
+    const logoX = 225 - logoSize / 2;
+    const logoY = 225 - logoSize / 2;
+    
+    // White circle background for logo
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(225, 225, logoSize / 2 + 5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Purple gradient circle
+    const gradient = ctx.createLinearGradient(logoX, logoY, logoX + logoSize, logoY + logoSize);
+    gradient.addColorStop(0, '#667eea');
+    gradient.addColorStop(1, '#764ba2');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(225, 225, logoSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Door icon in center (white)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(210, 205, 30, 40);
+    
+    // Door handle
+    ctx.fillStyle = '#667eea';
+    ctx.beginPath();
+    ctx.arc(232, 225, 4, 0, Math.PI * 2);
+    ctx.fill();
+    
     // Add branding text at bottom (NO activation code for security)
     ctx.fillStyle = '#000000';
     ctx.font = 'bold 24px Arial';
