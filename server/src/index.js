@@ -29,6 +29,9 @@ const io = new Server(httpServer, {
 // Connect to database
 connectDB();
 
+// Trust proxy (required for Render behind reverse proxy)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet());
 app.use(cors({
