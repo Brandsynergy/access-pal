@@ -54,12 +54,8 @@ export async function subscribeToPushNotifications() {
       console.log('✅ Subscribed to push');
     }
 
-    // Send subscription to server
-    const token = localStorage.getItem('token');
-    const response = await api.post('/push/subscribe', 
-      { subscription },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    // Send subscription to server (auth token added by interceptor)
+    const response = await api.post('/push/subscribe', { subscription });
 
     if (response.data.success) {
       console.log('✅ Push subscription saved to server');
@@ -91,11 +87,8 @@ export async function unsubscribeFromPushNotifications() {
       await subscription.unsubscribe();
       console.log('✅ Unsubscribed from push');
 
-      // Notify server
-      const token = localStorage.getItem('token');
-      await api.post('/push/unsubscribe', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Notify server (auth token added by interceptor)
+      await api.post('/push/unsubscribe');
     }
 
     return { success: true, message: 'Unsubscribed successfully' };
