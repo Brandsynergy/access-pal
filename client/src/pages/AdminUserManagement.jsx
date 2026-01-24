@@ -72,7 +72,15 @@ function AdminUserManagement() {
       const response = await api.post('/auth/admin/regenerate-qr', { userId });
       
       if (response.data.success) {
-        alert('QR code regenerated successfully!\n\nNew QR Code ID: ' + response.data.data.qrCodeId);
+        const { qrCodeId, lastFourDigits } = response.data.data;
+        alert(`QR code regenerated successfully!
+
+QR Code ID: ${qrCodeId}
+🔐 Activation Code: ${lastFourDigits}
+
+IMPORTANT: Write the activation code (${lastFourDigits}) on the back of the QR code sticker.
+The homeowner will need this code to activate the QR at their location.`);
+        
         // Refresh user data
         if (searchEmail) {
           searchUser(searchEmail);
@@ -197,7 +205,14 @@ function AdminUserManagement() {
                 <p><strong>Email:</strong> {user.email}</p>
                 <p><strong>Phone:</strong> {user.phoneNumber}</p>
                 <p><strong>QR Code ID:</strong> {user.qrCodeId}</p>
-                <p><strong>Status:</strong> 
+                {user.lastFourDigits && (
+                  <p><strong>🔐 Activation Code:</strong> 
+                    <span style={{ fontFamily: 'monospace', fontSize: '1.2em', color: '#667eea', fontWeight: 'bold' }}>
+                      {user.lastFourDigits}
+                    </span>
+                  </p>
+                )}
+                <p><strong>Status:</strong>
                   <span className={`status ${user.isQrActivated ? 'activated' : 'not-activated'}`}>
                     {user.isQrActivated ? ' ✅ Activated' : ' ⚠️ Not Activated'}
                   </span>
