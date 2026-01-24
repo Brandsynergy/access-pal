@@ -8,7 +8,12 @@ export const subscribe = async (req, res) => {
     const userId = req.user.id; // From auth middleware
     const { subscription } = req.body;
 
+    console.log('\n📨📨📨 PUSH SUBSCRIPTION REQUEST RECEIVED');
+    console.log('🆔 User ID:', userId);
+    console.log('📍 Subscription endpoint:', subscription?.endpoint?.substring(0, 50) + '...');
+
     if (!subscription || !subscription.endpoint) {
+      console.error('❌ Invalid subscription object');
       return res.status(400).json({
         success: false,
         message: 'Invalid subscription object'
@@ -16,6 +21,12 @@ export const subscribe = async (req, res) => {
     }
 
     const result = await subscribeToPush(userId, subscription);
+    
+    if (result.success) {
+      console.log('✅ Push subscription saved successfully for user:', userId);
+    } else {
+      console.error('❌ Failed to save push subscription:', result.message);
+    }
 
     res.json(result);
   } catch (error) {
