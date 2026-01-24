@@ -20,14 +20,38 @@ const Dashboard = () => {
   const [enablingNotifications, setEnablingNotifications] = useState(false);
 
   useEffect(() => {
-    // Request notification permission immediately
-    if ('Notification' in window && Notification.permission === 'default') {
-      setTimeout(() => {
-        Notification.requestPermission().then(permission => {
-          console.log('Notification permission:', permission);
-          setNotificationPermission(permission);
+    // Check current notification permission
+    if ('Notification' in window) {
+      const currentPermission = Notification.permission;
+      setNotificationPermission(currentPermission);
+      
+      // If already granted, subscribe to push immediately
+      if (currentPermission === 'granted') {
+        console.log('✅ Notification permission already granted, subscribing to push...');
+        subscribeToPushNotifications().then(result => {
+          if (result.success) {
+            console.log('✅ Auto-subscribed to push notifications');
+          } else {
+            console.log('⚠️ Auto-subscribe failed:', result.message);
+          }
         });
-      }, 1000);
+      } else if (currentPermission === 'default') {
+        // Auto-request permission after 1 second
+        setTimeout(() => {
+          Notification.requestPermission().then(async (permission) => {
+            console.log('Notification permission:', permission);
+            setNotificationPermission(permission);
+            
+            if (permission === 'granted') {
+              // Auto-subscribe if permission granted
+              const result = await subscribeToPushNotifications();
+              if (result.success) {
+                console.log('✅ Auto-subscribed to push notifications');
+              }
+            }
+          });
+        }, 1000);
+      }
     }
 
     // Monitor socket connection status
