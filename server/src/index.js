@@ -9,8 +9,10 @@ import { connectDB } from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import qrActivationRoutes from './routes/qrActivationRoutes.js';
 import monitoringRoutes from './routes/monitoringRoutes.js';
+import pushRoutes from './routes/pushRoutes.js';
 import { requestLoggerMiddleware } from './middleware/requestLogger.js';
 import { logError, logInfo } from './services/errorLogger.js';
+import { sendVisitorNotification } from './services/pushNotificationService.js';
 
 // Load environment variables
 dotenv.config();
@@ -56,6 +58,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/qr', qrActivationRoutes);
 app.use('/api/monitoring', monitoringRoutes);
+app.use('/api/push', pushRoutes);
 
 // WebRTC signaling via Socket.IO
 io.on('connection', (socket) => {
@@ -141,6 +144,18 @@ io.on('connection', (socket) => {
       console.log(`\n📡 Emitting 'visitor-at-door' event to room "${data.qrCodeId}"...`);
       io.to(data.qrCodeId).emit('visitor-at-door', data);
       console.log(`✅ Successfully emitted 'visitor-at-door' event`);
+      
+      // ALSO send push notification (works even if dashboard is closed)
+      console.log(`\n📱 Sending push notification...`);
+      sendVisitorNotification(data.qrCodeId, { timestamp: data.timestamp })
+        .then(result => {
+          if (result.success) {
+            console.log(`✅ Push notification sent successfully`);
+          } else {
+            console.log(`⚠️ Push notification not sent: ${result.message}`);
+          }
+        })
+        .catch(err => console.error(`❌ Push notification error:`, err));
     } else {
       console.log(`\n❌❌❌ WARNING: Room "${data.qrCodeId}" does NOT exist!`);
       console.log(`❌ No homeowner socket has joined this room`);
@@ -156,6 +171,18 @@ io.on('connection', (socket) => {
       // Still try to emit in case room tracking is off
       console.log(`\n📡 Still attempting to emit (in case room tracking is delayed)...`);
       io.to(data.qrCodeId).emit('visitor-at-door', data);
+      
+      // Send push notification since no socket connected
+      console.log(`\n📱 Sending push notification (no active socket)...`);
+      sendVisitorNotification(data.qrCodeId, { timestamp: data.timestamp })
+        .then(result => {
+          if (result.success) {
+            console.log(`✅ Push notification sent successfully`);
+          } else {
+            console.log(`⚠️ Push notification not sent: ${result.message}`);
+          }
+        })
+        .catch(err => console.error(`❌ Push notification error:`, err));
     }
     console.log(`==============================================\n\n`);
   });

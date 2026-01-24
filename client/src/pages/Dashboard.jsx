@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import webrtcService from '../services/webrtc';
+import { subscribeToPushNotifications } from '../services/pushNotifications';
 import QRCodeDisplay from '../components/QRCodeDisplay';
 import IncomingCall from '../components/IncomingCall';
 import VideoCall from '../components/VideoCall';
@@ -49,11 +50,11 @@ const Dashboard = () => {
     navigate('/login');
   };
 
-  const requestNotifications = () => {
+  const requestNotifications = async () => {
     console.log('🔔 Notification button clicked');
     if ('Notification' in window) {
       console.log('📱 Current permission:', Notification.permission);
-      Notification.requestPermission().then(permission => {
+      Notification.requestPermission().then(async (permission) => {
         console.log('📱 Permission result:', permission);
         setNotificationPermission(permission);
         if (permission === 'granted') {
@@ -64,6 +65,15 @@ const Dashboard = () => {
             badge: '/icon-192.png',
             vibrate: [200, 100, 200]
           });
+          
+          // Subscribe to push notifications
+          console.log('📨 Subscribing to push notifications...');
+          const result = await subscribeToPushNotifications();
+          if (result.success) {
+            console.log('✅ Push notifications enabled!');
+          } else {
+            console.error('❌ Push subscription failed:', result.message);
+          }
         } else {
           console.warn('⚠️ Permission denied or dismissed');
           alert('Please enable notifications in your browser settings to receive visitor alerts.');
