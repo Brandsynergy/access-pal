@@ -305,7 +305,8 @@ export const regenerateQRCode = async (req, res) => {
       message: 'QR code regenerated successfully',
       data: {
         qrCodeId: user.qrCodeId,
-        qrCodeImage: user.qrCodeImage
+        qrCodeImage: user.qrCodeImage,
+        lastFourDigits: user.lastFourDigits
       }
     });
   } catch (error) {

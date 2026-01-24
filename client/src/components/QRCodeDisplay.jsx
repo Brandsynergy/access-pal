@@ -89,6 +89,12 @@ const QRCodeDisplay = () => {
           {!loadingActivation && activationDetails && (
             <>
               <div className="info-item">
+                <span className="info-label">Activation Code:</span>
+                <span className="info-value" style={{ fontWeight: 'bold', color: '#667eea', fontSize: '1.2em', fontFamily: 'monospace' }}>
+                  {activationDetails.lastFourDigits || 'N/A'}
+                </span>
+              </div>
+              <div className="info-item">
                 <span className="info-label">Status:</span>
                 <span className={`info-value status-badge ${activationDetails.isActivated ? 'activated' : 'not-activated'}`}>
                   {activationDetails.isActivated ? '✅ Activated' : '⚠️ Not Activated'}

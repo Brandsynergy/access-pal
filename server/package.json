@@ -25,7 +25,8 @@
     "socket.io": "^4.6.1",
     "sqlite3": "^5.1.7",
     "uuid": "^9.0.1",
-    "validator": "^13.11.0"
+    "validator": "^13.11.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

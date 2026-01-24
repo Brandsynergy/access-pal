@@ -49,6 +49,10 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true
   },
+  pushSubscription: {
+    type: DataTypes.TEXT, // JSON string of push subscription
+    allowNull: true
+  },
   // Activation security fields
   lastFourDigits: {
     type: DataTypes.STRING(4),
