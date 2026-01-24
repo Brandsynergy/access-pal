@@ -1,5 +1,5 @@
 // Service Worker for ACCESS PAL PWA
-const CACHE_NAME = 'access-pal-v2';
+const CACHE_NAME = 'access-pal-v3';
 const urlsToCache = [
   '/manifest.json',
   '/icon-192.png',
@@ -64,35 +64,46 @@ self.addEventListener('activate', (event) => {
 
 // Handle push notifications
 self.addEventListener('push', (event) => {
-  console.log('Push notification received:', event);
+  console.log('🔔 Push notification received:', event);
   
-  let notificationData = {
-    title: 'ACCESS PAL',
+  // Default notification data
+  let title = 'ACCESS PAL';
+  let options = {
     body: 'Someone is at your door!',
     icon: '/icon-192.png',
     badge: '/icon-192.png',
-    tag: 'incoming-call',
+    tag: 'visitor-call',
     requireInteraction: true,
-    vibrate: [200, 100, 200],
+    vibrate: [200, 100, 200, 100, 200],
     data: {
       url: '/dashboard'
     }
   };
 
+  // Parse payload from server
   if (event.data) {
     try {
       const payload = event.data.json();
-      notificationData = {
-        ...notificationData,
-        ...payload
-      };
+      console.log('📦 Push payload:', payload);
+      
+      // Extract title and body from payload
+      if (payload.title) title = payload.title;
+      if (payload.body) options.body = payload.body;
+      if (payload.icon) options.icon = payload.icon;
+      if (payload.badge) options.badge = payload.badge;
+      if (payload.tag) options.tag = payload.tag;
+      if (payload.requireInteraction !== undefined) options.requireInteraction = payload.requireInteraction;
+      if (payload.vibrate) options.vibrate = payload.vibrate;
+      if (payload.data) options.data = payload.data;
     } catch (e) {
-      console.error('Error parsing push payload:', e);
+      console.error('❌ Error parsing push payload:', e);
     }
   }
 
+  console.log('📣 Showing notification:', title, options);
+
   event.waitUntil(
-    self.registration.showNotification(notificationData.title, notificationData)
+    self.registration.showNotification(title, options)
   );
 });
 

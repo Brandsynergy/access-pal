@@ -31,8 +31,8 @@ export const sendVisitorNotification = async (qrCodeId, visitorInfo = {}) => {
     const subscription = JSON.parse(user.pushSubscription);
 
     const payload = JSON.stringify({
-      title: '🔔 Visitor at Your Door!',
-      body: 'Someone has scanned your QR code and wants to talk',
+      title: 'ACCESS PAL - Visitor at Your Door!',
+      body: 'Someone has scanned your QR code. Tap to answer.',
       icon: '/icon-192.png',
       badge: '/icon-192.png',
       tag: 'visitor-call',
