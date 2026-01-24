@@ -17,12 +17,28 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
 
   useEffect(() => {
-    if (token) {
+    // Try to restore user from localStorage first (faster)
+    const savedUser = localStorage.getItem('user');
+    const savedToken = localStorage.getItem('token');
+    
+    if (savedToken && savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+        setToken(savedToken);
+        // Verify token is still valid by loading fresh user data
+        loadUser();
+      } catch (error) {
+        console.error('Failed to parse saved user:', error);
+        setLoading(false);
+      }
+    } else if (savedToken) {
+      // Have token but no user data, load from server
       loadUser();
     } else {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   const loadUser = async () => {
     try {

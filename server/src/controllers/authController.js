@@ -33,11 +33,11 @@ export const register = async (req, res) => {
       lastFourDigits
     });
 
-    // Generate JWT token
+    // Generate JWT token (30 days for PWA persistence)
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '30d' }
     );
 
     res.status(201).json({
@@ -92,11 +92,11 @@ export const login = async (req, res) => {
       });
     }
 
-    // Generate JWT token
+    // Generate JWT token (30 days for PWA persistence)
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '30d' }
     );
 
     res.json({
