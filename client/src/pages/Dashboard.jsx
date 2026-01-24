@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [notificationPermission, setNotificationPermission] = useState(
     'Notification' in window ? Notification.permission : 'unsupported'
   );
+  const [enablingNotifications, setEnablingNotifications] = useState(false);
 
   useEffect(() => {
     // Request notification permission immediately
@@ -52,13 +53,20 @@ const Dashboard = () => {
 
   const requestNotifications = async () => {
     console.log('🔔 Notification button clicked');
-    if ('Notification' in window) {
-      console.log('📱 Current permission:', Notification.permission);
-      Notification.requestPermission().then(async (permission) => {
+    setEnablingNotifications(true);
+    
+    try {
+      if ('Notification' in window) {
+        console.log('📱 Current permission:', Notification.permission);
+        
+        const permission = await Notification.requestPermission();
         console.log('📱 Permission result:', permission);
         setNotificationPermission(permission);
+        
         if (permission === 'granted') {
           console.log('✅ Permission granted, showing test notification');
+          
+          // Show test notification
           new Notification('✅ Notifications Enabled!', {
             body: 'You will now be alerted when visitors scan your QR code',
             icon: '/icon-192.png',
@@ -69,22 +77,29 @@ const Dashboard = () => {
           // Subscribe to push notifications
           console.log('📨 Subscribing to push notifications...');
           const result = await subscribeToPushNotifications();
+          
           if (result.success) {
             console.log('✅ Push notifications enabled!');
+            alert('✅ Success! You will receive notifications when visitors scan your QR code.');
           } else {
             console.error('❌ Push subscription failed:', result.message);
+            alert('⚠️ Browser notifications enabled, but push service failed: ' + result.message);
           }
+        } else if (permission === 'denied') {
+          console.warn('❌ Permission denied');
+          alert('❌ Notifications blocked. Please enable them in your browser settings:\n\n1. Click the lock icon in the address bar\n2. Find "Notifications"\n3. Select "Allow"\n4. Refresh the page');
         } else {
-          console.warn('⚠️ Permission denied or dismissed');
-          alert('Please enable notifications in your browser settings to receive visitor alerts.');
+          console.warn('⚠️ Permission dismissed');
         }
-      }).catch(error => {
-        console.error('❌ Notification permission error:', error);
-        alert('Error requesting notification permission. Please check browser settings.');
-      });
-    } else {
-      console.error('❌ Notifications not supported');
-      alert('Your browser does not support notifications.');
+      } else {
+        console.error('❌ Notifications not supported');
+        alert('Your browser does not support notifications.');
+      }
+    } catch (error) {
+      console.error('❌ Notification error:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      setEnablingNotifications(false);
     }
   };
 
@@ -144,18 +159,20 @@ const Dashboard = () => {
             </p>
             <button 
               onClick={requestNotifications}
+              disabled={enablingNotifications}
               style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: enablingNotifications ? '#cccccc' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 color: 'white',
                 border: 'none',
                 padding: '12px 30px',
                 borderRadius: '8px',
                 fontSize: '16px',
                 fontWeight: '700',
-                cursor: 'pointer'
+                cursor: enablingNotifications ? 'not-allowed' : 'pointer',
+                opacity: enablingNotifications ? 0.6 : 1
               }}
             >
-              🔔 Enable Notifications Now
+              {enablingNotifications ? '⏳ Enabling...' : '🔔 Enable Notifications Now'}
             </button>
           </div>
         )}
