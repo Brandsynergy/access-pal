@@ -109,8 +109,12 @@ export const CallProvider = ({ children }) => {
       joinHomeownerRoom();
     }
 
-    // Listen for incoming visitor alerts
+    // Listen for incoming visitor alerts - ONCE only to prevent duplicates
     console.log('🎯 CallContext: Setting up visitor-at-door listener');
+    
+    // Remove any existing listener first
+    webrtcService.socket.off('visitor-at-door');
+    
     webrtcService.socket.on('visitor-at-door', (data) => {
       console.log('\n\n🔔🔔🔔 VISITOR AT DOOR RECEIVED IN CALLCONTEXT!');
       console.log('📍 Data:', JSON.stringify(data));
@@ -122,7 +126,7 @@ export const CallProvider = ({ children }) => {
       setIncomingCall(data);
       setCallState('ringing');
       playRingtone();
-      showBrowserNotification(data);
+      // DON'T show browser notification here - push notification already sent from server!
     });
 
     // Listen for offers from visitors
@@ -139,6 +143,14 @@ export const CallProvider = ({ children }) => {
     return () => {
       // Cleanup on unmount
       console.log('🧹 CallContext cleanup');
+      // Remove all socket listeners
+      if (webrtcService.socket) {
+        webrtcService.socket.off('visitor-at-door');
+        webrtcService.socket.off('offer');
+        webrtcService.socket.off('user-joined');
+        webrtcService.socket.off('connect');
+        webrtcService.socket.off('reconnect');
+      }
       webrtcService.cleanup();
     };
   }, []);

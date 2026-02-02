@@ -14,27 +14,8 @@ function IncomingCall() {
       console.log('🚨 SHOWING INCOMING CALL UI!');
       notificationShown.current = true;
       
-      // Show browser notification
-      if ('Notification' in window && Notification.permission === 'granted') {
-        console.log('📱 Showing browser notification');
-        const notification = new Notification('🔔 Visitor at Your Door!', {
-          body: 'Someone has scanned your QR code and wants to talk',
-          icon: '/icon-192.png',
-          badge: '/icon-192.png',
-          tag: 'visitor-call',
-          requireInteraction: true,
-          vibrate: [200, 100, 200, 100, 200]
-        });
-
-        notification.onclick = () => {
-          window.focus();
-          notification.close();
-        };
-      } else {
-        console.warn('⚠️ Browser notification NOT shown. Permission:', Notification.permission);
-      }
-
-      // Play doorbell sound
+      // DON'T show browser notification - push notification already shown!
+      // Just play doorbell sound
       if (audioRef.current) {
         console.log('🔊 Playing doorbell sound');
         audioRef.current.play().catch(err => console.log('Audio play failed:', err));
