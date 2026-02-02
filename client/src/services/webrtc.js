@@ -223,6 +223,7 @@ class WebRTCService {
     try {
       this.qrCodeId = qrCodeId;
       this.userType = 'visitor';
+      this.alertSent = false; // Track if alert already sent
 
       // Initialize socket and peer connection
       this.initSocket();
@@ -301,18 +302,23 @@ class WebRTCService {
 
       console.log('📤 VISITOR: Sent offer to homeowner');
 
-      // Wait a moment to ensure offer is sent, then alert homeowner
+      // Wait a moment to ensure offer is sent, then alert homeowner ONCE
       setTimeout(() => {
-        console.log('\n\n🔔🔔🔔 VISITOR: Sending visitor-alert to homeowner!');
-        console.log('🆔 Visitor socket ID:', this.socket.id);
-        console.log('🏠 Room (qrCodeId):', qrCodeId);
-        console.log('⏰ Timestamp:', new Date().toISOString());
-        console.log('📡 Emitting visitor-alert event...\n');
-        this.socket.emit('visitor-alert', { 
-          qrCodeId,
-          timestamp: new Date().toISOString()
-        });
-        console.log('✅ visitor-alert emitted successfully\n');
+        if (!this.alertSent) {
+          this.alertSent = true;
+          console.log('\n\n🔔🔔🔔 VISITOR: Sending visitor-alert to homeowner!');
+          console.log('🆔 Visitor socket ID:', this.socket.id);
+          console.log('🏠 Room (qrCodeId):', qrCodeId);
+          console.log('⏰ Timestamp:', new Date().toISOString());
+          console.log('📡 Emitting visitor-alert event...\n');
+          this.socket.emit('visitor-alert', { 
+            qrCodeId,
+            timestamp: new Date().toISOString()
+          });
+          console.log('✅ visitor-alert emitted successfully\n');
+        } else {
+          console.log('⚠️ Visitor-alert already sent, skipping duplicate');
+        }
       }, 500); // Short delay to ensure offer is sent first
 
     } catch (error) {

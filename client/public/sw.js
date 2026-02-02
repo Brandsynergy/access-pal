@@ -1,5 +1,5 @@
-// Service Worker for ACCESS PAL PWA - iOS Push Fix
-const CACHE_NAME = 'access-pal-v4-ios-push-fix';
+// Service Worker for ACCESS PAL PWA - v4.1 Duplicate Fix
+const CACHE_NAME = 'access-pal-v4-1-duplicate-fix';
 const urlsToCache = [
   '/manifest.json',
   '/icon-192.png',
@@ -74,7 +74,7 @@ self.addEventListener('push', (event) => {
     body: 'Someone is at your door! Tap to answer.',
     icon: '/icon-192.png',
     badge: '/icon-192.png',
-    tag: 'visitor-call-' + Date.now(), // CRITICAL: Unique tag for iOS
+    tag: 'visitor-call', // STATIC tag - replaces previous notification
     requireInteraction: true,
     renotify: true, // CRITICAL: Force show even if similar notification exists
     silent: false, // CRITICAL: Must not be silent
@@ -105,8 +105,7 @@ self.addEventListener('push', (event) => {
       if (payload.body) options.body = payload.body;
       if (payload.icon) options.icon = payload.icon;
       if (payload.badge) options.badge = payload.badge;
-      // Always use unique tag for iOS
-      options.tag = 'visitor-call-' + Date.now();
+      if (payload.tag) options.tag = payload.tag; // Use tag from payload if provided
       if (payload.requireInteraction !== undefined) options.requireInteraction = payload.requireInteraction;
       if (payload.vibrate) options.vibrate = payload.vibrate;
       if (payload.data) options.data = { ...options.data, ...payload.data };
