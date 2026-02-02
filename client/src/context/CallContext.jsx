@@ -25,6 +25,30 @@ export const CallProvider = ({ children }) => {
   useEffect(() => {
     console.log('🎬 CallContext initializing...');
     
+    // CRITICAL: Check for pending incoming call from localStorage (from notification tap)
+    const pendingCallStr = localStorage.getItem('pendingIncomingCall');
+    if (pendingCallStr) {
+      try {
+        const pendingCall = JSON.parse(pendingCallStr);
+        const callAge = Date.now() - new Date(pendingCall.timestamp).getTime();
+        
+        // Only restore if call is less than 2 minutes old
+        if (callAge < 120000) {
+          console.log('🚨🚨🚨 RESTORING PENDING CALL FROM LOCALSTORAGE!');
+          console.log('Call data:', pendingCall);
+          setIncomingCall(pendingCall);
+          setCallState('ringing');
+          playRingtone();
+        } else {
+          console.log('⚠️ Pending call too old, clearing');
+          localStorage.removeItem('pendingIncomingCall');
+        }
+      } catch (error) {
+        console.error('❌ Error restoring pending call:', error);
+        localStorage.removeItem('pendingIncomingCall');
+      }
+    }
+    
     // Request browser notification permission
     requestNotificationPermission();
 
@@ -123,6 +147,13 @@ export const CallProvider = ({ children }) => {
       console.log('📱 Notification permission:', Notification.permission);
       console.log('\n');
       
+      // CRITICAL: Store in localStorage so it persists when Safari opens from notification
+      const callData = {
+        ...data,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('pendingIncomingCall', JSON.stringify(callData));
+      
       setIncomingCall(data);
       setCallState('ringing');
       playRingtone();
@@ -218,6 +249,9 @@ export const CallProvider = ({ children }) => {
   const acceptCall = async () => {
     try {
       console.log('📞 Homeowner accepting call...');
+      // Clear pending call from localStorage
+      localStorage.removeItem('pendingIncomingCall');
+      
       setCallState('calling');
       setError(null);
 
@@ -250,6 +284,9 @@ export const CallProvider = ({ children }) => {
         room: incomingCall.qrCodeId
       });
     }
+    // Clear pending call from localStorage
+    localStorage.removeItem('pendingIncomingCall');
+    
     setIncomingCall(null);
     setCallState('idle');
   };
@@ -262,6 +299,9 @@ export const CallProvider = ({ children }) => {
 
   // Handle call end cleanup
   const handleCallEnd = () => {
+    // Clear pending call from localStorage
+    localStorage.removeItem('pendingIncomingCall');
+    
     setCallState('ended');
     setLocalStream(null);
     setRemoteStream(null);
