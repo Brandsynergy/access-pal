@@ -1,5 +1,5 @@
-// Service Worker for ACCESS PAL PWA - v4.1 Duplicate Fix
-const CACHE_NAME = 'access-pal-v4-1-duplicate-fix';
+// Service Worker for ACCESS PAL PWA - v5.0 SERVER STORAGE FIX
+const CACHE_NAME = 'access-pal-v5-0-server-storage';
 const urlsToCache = [
   '/manifest.json',
   '/icon-192.png',
