@@ -25,70 +25,62 @@ export const CallProvider = ({ children }) => {
   useEffect(() => {
     console.log('\n\n🎬🎬🎬 CallContext initializing...');
     console.log('⏰ Current time:', new Date().toISOString());
-    console.log('📋 Checking localStorage for pending call...');
     
-    // CRITICAL: Check for pending incoming call from localStorage (from notification tap)
-    const pendingCallStr = localStorage.getItem('pendingIncomingCall');
-    const pendingOfferStr = localStorage.getItem('pendingOffer');
-    
-    console.log('💾 localStorage pendingIncomingCall:', pendingCallStr ? 'EXISTS' : 'EMPTY');
-    console.log('💾 localStorage pendingOffer:', pendingOfferStr ? 'EXISTS' : 'EMPTY');
-    
-    if (pendingCallStr) {
+    // CRITICAL: Fetch pending call from SERVER instead of localStorage
+    // This solves the iOS Safari notification issue where socket disconnects
+    const fetchPendingCall = async () => {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        console.log('💭 No user in localStorage, skipping pending call fetch');
+        return;
+      }
+      
       try {
-        const pendingCall = JSON.parse(pendingCallStr);
-        console.log('📑 Parsed pendingCall:', JSON.stringify(pendingCall));
+        const user = JSON.parse(userStr);
+        if (!user.qrCodeId) {
+          console.log('⚠️ No qrCodeId for user');
+          return;
+        }
         
-        const callAge = Date.now() - new Date(pendingCall.timestamp).getTime();
-        console.log('⏱️ Call age (ms):', callAge, '(max 120000)');
+        console.log(`🌐 Fetching pending call from server for ${user.qrCodeId}...`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/calls/pending/${user.qrCodeId}`);
+        const result = await response.json();
         
-        // Only restore if call is less than 2 minutes old
-        if (callAge < 120000) {
-          console.log('\n🚨🚨🚨 RESTORING PENDING CALL FROM LOCALSTORAGE!');
-          console.log('📞 Setting incomingCall:', pendingCall);
-          console.log('📞 Setting callState: ringing');
-          console.log('🔔 Playing ringtone...');
+        if (result.success && result.data) {
+          console.log('\n🚨🚨🚨 PENDING CALL FOUND ON SERVER!');
+          console.log('📑 Call data:', JSON.stringify(result.data));
           
-          setIncomingCall(pendingCall);
-          setCallState('ringing');
-          playRingtone();
+          const callAge = Date.now() - new Date(result.data.timestamp).getTime();
+          console.log('⏱️ Call age:', Math.round(callAge/1000), 'seconds');
           
-          // CRITICAL: Also restore the pending offer if it exists
-          if (pendingOfferStr) {
-            try {
-              const offer = JSON.parse(pendingOfferStr);
-              console.log('\n🚨🚨🚨 RESTORING PENDING OFFER FROM LOCALSTORAGE!');
-              console.log('📦 Offer SDP type:', offer?.type);
-              console.log('📦 Offer SDP length:', offer?.sdp?.length);
-              setPendingOffer(offer);
-              console.log('✅ Pending offer restored successfully');
-            } catch (error) {
-              console.error('❌ Error parsing pending offer:', error);
+          if (callAge < 120000) { // 2 minutes
+            console.log('📞 Setting incomingCall');
+            console.log('📞 Setting callState: ringing');
+            
+            setIncomingCall(result.data);
+            setCallState('ringing');
+            playRingtone();
+            
+            if (result.data.offer) {
+              console.log('📦 Setting pendingOffer from server data');
+              setPendingOffer(result.data.offer);
+            } else {
+              console.warn('⚠️⚠️ NO OFFER IN SERVER DATA!');
             }
+            
+            console.log('\n✅✅✅ CALL RESTORED FROM SERVER!');
           } else {
-            console.warn('⚠️⚠️⚠️ NO PENDING OFFER IN LOCALSTORAGE! Answer may fail!');
+            console.log('⚠️ Call too old, ignoring');
           }
-          
-          console.log('\n✅✅✅ RESTORATION COMPLETE!');
-          console.log('📄 Final state:');
-          console.log('  - incomingCall:', !!pendingCall);
-          console.log('  - callState: ringing');
-          console.log('  - pendingOffer:', !!pendingOfferStr);
-          console.log('\n');
         } else {
-          console.log('⚠️ Pending call too old (' + Math.round(callAge/1000) + 's), clearing');
-          localStorage.removeItem('pendingIncomingCall');
-          localStorage.removeItem('pendingOffer');
+          console.log('💭 No pending call on server');
         }
       } catch (error) {
-        console.error('❌ Error restoring pending call:', error);
-        console.error('Stack:', error.stack);
-        localStorage.removeItem('pendingIncomingCall');
-        localStorage.removeItem('pendingOffer');
+        console.error('❌ Error fetching pending call from server:', error);
       }
-    } else {
-      console.log('💭 No pending call in localStorage - normal dashboard load');
-    }
+    };
+    
+    fetchPendingCall();
     
     console.log('🎬 CallContext initialization phase complete\n\n');
     
@@ -189,17 +181,7 @@ export const CallProvider = ({ children }) => {
       console.log('⏰ Current time:', new Date().toISOString());
       console.log('📱 Notification permission:', Notification.permission);
       console.log('\n');
-      
-      // CRITICAL: Store in localStorage so it persists when Safari opens from notification
-      const callData = {
-        ...data,
-        timestamp: new Date().toISOString()
-      };
-      console.log('💾 STORING TO LOCALSTORAGE:');
-      console.log('  - Key: pendingIncomingCall');
-      console.log('  - Value:', JSON.stringify(callData));
-      localStorage.setItem('pendingIncomingCall', JSON.stringify(callData));
-      console.log('✅ Stored pendingIncomingCall to localStorage');
+      // Server already stored this via storePendingCall() when event was received
       
       setIncomingCall(data);
       setCallState('ringing');
@@ -213,12 +195,7 @@ export const CallProvider = ({ children }) => {
       console.log('📦 Offer SDP type:', data.offer?.type);
       console.log('📦 Offer SDP length:', data.offer?.sdp?.length);
       console.log('🎯 Room:', data.room);
-      
-      console.log('💾 STORING OFFER TO LOCALSTORAGE:');
-      console.log('  - Key: pendingOffer');
-      console.log('  - Offer type:', data.offer?.type);
-      localStorage.setItem('pendingOffer', JSON.stringify(data.offer));
-      console.log('✅ Stored pendingOffer to localStorage\n');
+      // Server already stored this via storePendingOffer() when offer was received
       
       setPendingOffer(data.offer);
       console.log('✅ Set pendingOffer in state\n');
@@ -307,9 +284,6 @@ export const CallProvider = ({ children }) => {
   const acceptCall = async () => {
     try {
       console.log('📞 Homeowner accepting call...');
-      // Clear pending call and offer from localStorage
-      localStorage.removeItem('pendingIncomingCall');
-      localStorage.removeItem('pendingOffer');
       
       setCallState('calling');
       setError(null);
@@ -343,9 +317,6 @@ export const CallProvider = ({ children }) => {
         room: incomingCall.qrCodeId
       });
     }
-    // Clear pending call and offer from localStorage
-    localStorage.removeItem('pendingIncomingCall');
-    localStorage.removeItem('pendingOffer');
     
     setIncomingCall(null);
     setCallState('idle');
@@ -359,9 +330,6 @@ export const CallProvider = ({ children }) => {
 
   // Handle call end cleanup
   const handleCallEnd = () => {
-    // Clear pending call and offer from localStorage
-    localStorage.removeItem('pendingIncomingCall');
-    localStorage.removeItem('pendingOffer');
     
     setCallState('ended');
     setLocalStream(null);

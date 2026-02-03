@@ -10,9 +10,11 @@ import authRoutes from './routes/authRoutes.js';
 import qrActivationRoutes from './routes/qrActivationRoutes.js';
 import monitoringRoutes from './routes/monitoringRoutes.js';
 import pushRoutes from './routes/pushRoutes.js';
+import callRoutes from './routes/callRoutes.js';
 import { requestLoggerMiddleware } from './middleware/requestLogger.js';
 import { logError, logInfo } from './services/errorLogger.js';
 import { sendVisitorNotification } from './services/pushNotificationService.js';
+import { storePendingCall, storePendingOffer } from './services/callStorage.js';
 
 // Load environment variables
 dotenv.config();
@@ -62,6 +64,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/qr', qrActivationRoutes);
 app.use('/api/monitoring', monitoringRoutes);
 app.use('/api/push', pushRoutes);
+app.use('/api/calls', callRoutes);
 
 // WebRTC signaling via Socket.IO
 io.on('connection', (socket) => {
@@ -96,6 +99,10 @@ io.on('connection', (socket) => {
     console.log(`\n📤 Forwarding offer to room: ${data.room}`);
     const room = io.sockets.adapter.rooms.get(data.room);
     console.log(`👥 Sockets in room:`, room ? Array.from(room) : 'Room not found');
+    
+    // CRITICAL: Store offer on server in case homeowner isn't connected
+    storePendingOffer(data.room, data.offer);
+    
     socket.to(data.room).emit('offer', data);
   });
 
@@ -143,6 +150,9 @@ io.on('connection', (socket) => {
         console.log(`  - Room "${roomName}": ${Array.from(sockets).join(', ')}`);
       });
       
+      // CRITICAL: Store call on server so it can be retrieved later
+      storePendingCall(data.qrCodeId, data);
+      
       // Emit to entire room including sender
       console.log(`\n📡 Emitting 'visitor-at-door' event to room "${data.qrCodeId}"...`);
       io.to(data.qrCodeId).emit('visitor-at-door', data);
@@ -170,6 +180,9 @@ io.on('connection', (socket) => {
           console.log(`  - Room "${roomName}": ${Array.from(sockets).join(', ')}`);
         });
       }
+      
+      // CRITICAL: Store call on server so it can be retrieved later
+      storePendingCall(data.qrCodeId, data);
       
       // Still try to emit in case room tracking is off
       console.log(`\n📡 Still attempting to emit (in case room tracking is delayed)...`);
