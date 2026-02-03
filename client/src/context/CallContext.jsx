@@ -39,13 +39,27 @@ export const CallProvider = ({ children }) => {
           setIncomingCall(pendingCall);
           setCallState('ringing');
           playRingtone();
+          
+          // CRITICAL: Also restore the pending offer if it exists
+          const pendingOfferStr = localStorage.getItem('pendingOffer');
+          if (pendingOfferStr) {
+            try {
+              const offer = JSON.parse(pendingOfferStr);
+              console.log('🚨🚨🚨 RESTORING PENDING OFFER FROM LOCALSTORAGE!');
+              setPendingOffer(offer);
+            } catch (error) {
+              console.error('❌ Error parsing pending offer:', error);
+            }
+          }
         } else {
           console.log('⚠️ Pending call too old, clearing');
           localStorage.removeItem('pendingIncomingCall');
+          localStorage.removeItem('pendingOffer');
         }
       } catch (error) {
         console.error('❌ Error restoring pending call:', error);
         localStorage.removeItem('pendingIncomingCall');
+        localStorage.removeItem('pendingOffer');
       }
     }
     
@@ -164,6 +178,9 @@ export const CallProvider = ({ children }) => {
     webrtcService.socket.on('offer', (data) => {
       console.log('📞 Received offer from visitor, storing for when homeowner accepts');
       setPendingOffer(data.offer);
+      
+      // CRITICAL: Store offer in localStorage so it persists when Safari opens from notification
+      localStorage.setItem('pendingOffer', JSON.stringify(data.offer));
     });
 
     // Debug: Listen for user-joined events
@@ -249,8 +266,9 @@ export const CallProvider = ({ children }) => {
   const acceptCall = async () => {
     try {
       console.log('📞 Homeowner accepting call...');
-      // Clear pending call from localStorage
+      // Clear pending call and offer from localStorage
       localStorage.removeItem('pendingIncomingCall');
+      localStorage.removeItem('pendingOffer');
       
       setCallState('calling');
       setError(null);
@@ -284,8 +302,9 @@ export const CallProvider = ({ children }) => {
         room: incomingCall.qrCodeId
       });
     }
-    // Clear pending call from localStorage
+    // Clear pending call and offer from localStorage
     localStorage.removeItem('pendingIncomingCall');
+    localStorage.removeItem('pendingOffer');
     
     setIncomingCall(null);
     setCallState('idle');
@@ -299,8 +318,9 @@ export const CallProvider = ({ children }) => {
 
   // Handle call end cleanup
   const handleCallEnd = () => {
-    // Clear pending call from localStorage
+    // Clear pending call and offer from localStorage
     localStorage.removeItem('pendingIncomingCall');
+    localStorage.removeItem('pendingOffer');
     
     setCallState('ended');
     setLocalStream(null);
