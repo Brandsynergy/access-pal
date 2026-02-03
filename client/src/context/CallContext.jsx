@@ -43,7 +43,11 @@ export const CallProvider = ({ children }) => {
         }
         
         console.log(`🌐 Fetching pending call from server for ${user.qrCodeId}...`);
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/calls/pending/${user.qrCodeId}`);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        const baseUrl = apiUrl.replace(/\/api$/, ''); // Remove /api if present
+        const fetchUrl = `${baseUrl}/api/calls/pending/${user.qrCodeId}`;
+        console.log('📡 Fetch URL:', fetchUrl);
+        const response = await fetch(fetchUrl);
         const result = await response.json();
         
         if (result.success && result.data) {
