@@ -23,45 +23,74 @@ export const CallProvider = ({ children }) => {
   const [isVideoOff, setIsVideoOff] = useState(false);
 
   useEffect(() => {
-    console.log('🎬 CallContext initializing...');
+    console.log('\n\n🎬🎬🎬 CallContext initializing...');
+    console.log('⏰ Current time:', new Date().toISOString());
+    console.log('📋 Checking localStorage for pending call...');
     
     // CRITICAL: Check for pending incoming call from localStorage (from notification tap)
     const pendingCallStr = localStorage.getItem('pendingIncomingCall');
+    const pendingOfferStr = localStorage.getItem('pendingOffer');
+    
+    console.log('💾 localStorage pendingIncomingCall:', pendingCallStr ? 'EXISTS' : 'EMPTY');
+    console.log('💾 localStorage pendingOffer:', pendingOfferStr ? 'EXISTS' : 'EMPTY');
+    
     if (pendingCallStr) {
       try {
         const pendingCall = JSON.parse(pendingCallStr);
+        console.log('📑 Parsed pendingCall:', JSON.stringify(pendingCall));
+        
         const callAge = Date.now() - new Date(pendingCall.timestamp).getTime();
+        console.log('⏱️ Call age (ms):', callAge, '(max 120000)');
         
         // Only restore if call is less than 2 minutes old
         if (callAge < 120000) {
-          console.log('🚨🚨🚨 RESTORING PENDING CALL FROM LOCALSTORAGE!');
-          console.log('Call data:', pendingCall);
+          console.log('\n🚨🚨🚨 RESTORING PENDING CALL FROM LOCALSTORAGE!');
+          console.log('📞 Setting incomingCall:', pendingCall);
+          console.log('📞 Setting callState: ringing');
+          console.log('🔔 Playing ringtone...');
+          
           setIncomingCall(pendingCall);
           setCallState('ringing');
           playRingtone();
           
           // CRITICAL: Also restore the pending offer if it exists
-          const pendingOfferStr = localStorage.getItem('pendingOffer');
           if (pendingOfferStr) {
             try {
               const offer = JSON.parse(pendingOfferStr);
-              console.log('🚨🚨🚨 RESTORING PENDING OFFER FROM LOCALSTORAGE!');
+              console.log('\n🚨🚨🚨 RESTORING PENDING OFFER FROM LOCALSTORAGE!');
+              console.log('📦 Offer SDP type:', offer?.type);
+              console.log('📦 Offer SDP length:', offer?.sdp?.length);
               setPendingOffer(offer);
+              console.log('✅ Pending offer restored successfully');
             } catch (error) {
               console.error('❌ Error parsing pending offer:', error);
             }
+          } else {
+            console.warn('⚠️⚠️⚠️ NO PENDING OFFER IN LOCALSTORAGE! Answer may fail!');
           }
+          
+          console.log('\n✅✅✅ RESTORATION COMPLETE!');
+          console.log('📄 Final state:');
+          console.log('  - incomingCall:', !!pendingCall);
+          console.log('  - callState: ringing');
+          console.log('  - pendingOffer:', !!pendingOfferStr);
+          console.log('\n');
         } else {
-          console.log('⚠️ Pending call too old, clearing');
+          console.log('⚠️ Pending call too old (' + Math.round(callAge/1000) + 's), clearing');
           localStorage.removeItem('pendingIncomingCall');
           localStorage.removeItem('pendingOffer');
         }
       } catch (error) {
         console.error('❌ Error restoring pending call:', error);
+        console.error('Stack:', error.stack);
         localStorage.removeItem('pendingIncomingCall');
         localStorage.removeItem('pendingOffer');
       }
+    } else {
+      console.log('💭 No pending call in localStorage - normal dashboard load');
     }
+    
+    console.log('🎬 CallContext initialization phase complete\n\n');
     
     // Request browser notification permission
     requestNotificationPermission();
@@ -166,7 +195,11 @@ export const CallProvider = ({ children }) => {
         ...data,
         timestamp: new Date().toISOString()
       };
+      console.log('💾 STORING TO LOCALSTORAGE:');
+      console.log('  - Key: pendingIncomingCall');
+      console.log('  - Value:', JSON.stringify(callData));
       localStorage.setItem('pendingIncomingCall', JSON.stringify(callData));
+      console.log('✅ Stored pendingIncomingCall to localStorage');
       
       setIncomingCall(data);
       setCallState('ringing');
@@ -176,11 +209,19 @@ export const CallProvider = ({ children }) => {
 
     // Listen for offers from visitors
     webrtcService.socket.on('offer', (data) => {
-      console.log('📞 Received offer from visitor, storing for when homeowner accepts');
-      setPendingOffer(data.offer);
+      console.log('\n📞📞📞 OFFER RECEIVED FROM VISITOR!');
+      console.log('📦 Offer SDP type:', data.offer?.type);
+      console.log('📦 Offer SDP length:', data.offer?.sdp?.length);
+      console.log('🎯 Room:', data.room);
       
-      // CRITICAL: Store offer in localStorage so it persists when Safari opens from notification
+      console.log('💾 STORING OFFER TO LOCALSTORAGE:');
+      console.log('  - Key: pendingOffer');
+      console.log('  - Offer type:', data.offer?.type);
       localStorage.setItem('pendingOffer', JSON.stringify(data.offer));
+      console.log('✅ Stored pendingOffer to localStorage\n');
+      
+      setPendingOffer(data.offer);
+      console.log('✅ Set pendingOffer in state\n');
     });
 
     // Debug: Listen for user-joined events
