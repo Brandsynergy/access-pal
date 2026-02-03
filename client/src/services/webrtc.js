@@ -59,7 +59,25 @@ class WebRTCService {
   // Initialize WebRTC peer connection
   initPeerConnection() {
     const configuration = {
-      iceServers: [{ urls: STUN_SERVER }]
+      iceServers: [
+        { urls: STUN_SERVER },
+        // Add public TURN servers for better connectivity through firewalls
+        {
+          urls: 'turn:openrelay.metered.ca:80',
+          username: 'openrelayproject',
+          credential: 'openrelayproject'
+        },
+        {
+          urls: 'turn:openrelay.metered.ca:443',
+          username: 'openrelayproject',
+          credential: 'openrelayproject'
+        },
+        {
+          urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+          username: 'openrelayproject',
+          credential: 'openrelayproject'
+        }
+      ]
     };
 
     this.peerConnection = new RTCPeerConnection(configuration);
